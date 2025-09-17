@@ -21,7 +21,7 @@ if (response.IsSuccessStatusCode)
     builder.Configuration.AddJsonStream(stream);
 }
 
-var apiBase = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:7000/";
+var apiBase = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5000/";
 builder.Services.AddHttpClient("Api", client => client.BaseAddress = new Uri(apiBase));
 
 // MudBlazor services
