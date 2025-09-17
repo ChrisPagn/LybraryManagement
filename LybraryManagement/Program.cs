@@ -1,3 +1,5 @@
+//program.cs cote client
+
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using LybraryManagement;
@@ -19,7 +21,7 @@ if (response.IsSuccessStatusCode)
     builder.Configuration.AddJsonStream(stream);
 }
 
-var apiBase = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5000/";
+var apiBase = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:7000/";
 builder.Services.AddHttpClient("Api", client => client.BaseAddress = new Uri(apiBase));
 
 // MudBlazor services
