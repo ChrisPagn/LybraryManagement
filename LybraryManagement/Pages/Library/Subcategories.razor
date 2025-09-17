@@ -1,0 +1,115 @@
+@page "/subcategories"
+@using MudBlazor
+@using LybraryManagement.Services
+@using LybraryManagement.Shared.Library.DTOs
+@inject IHttpClientFactory HttpFactory
+@inject ISnackbar Snackbar
+
+<PageTitle>Sous-catégories</PageTitle>
+
+<MudPaper Class="pa-4">
+    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudText Typo="Typo.h5">Sous-catégories</MudText>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreate">Ajouter</MudButton>
+    </MudStack>
+
+    <MudTable Items="subcategories" Dense="true" Hover="true" Class="mt-4">
+        <HeaderContent>
+            <MudTh>ID</MudTh>
+            <MudTh>Catégorie</MudTh>
+            <MudTh>Nom</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="ID">@context.SubcategoryId</MudTd>
+            <MudTd DataLabel="Catégorie">@context.CategoryId</MudTd>
+            <MudTd DataLabel="Nom">@context.Name</MudTd>
+            <MudTd DataLabel="Description">@context.Description</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(context)" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@if (dialogVisible)
+{
+    <MudPaper Class="pa-4 mt-4">
+        <MudText Typo="Typo.h6">@dialogTitle</MudText>
+        <MudForm @ref="form">
+            <MudNumericField T="int?" Label="CatégorieId" @bind-Value="categoryId" />
+            <MudTextField @bind-Value="name" Label="Nom" Required="true" />
+            <MudTextField @bind-Value="description" Label="Description" />
+        </MudForm>
+        <MudStack Row Spacing="2" Class="mt-2">
+            <MudButton OnClick="Save" Color="Color.Primary">Enregistrer</MudButton>
+            <MudButton OnClick="() => dialogVisible = false">Annuler</MudButton>
+        </MudStack>
+    </MudPaper>
+}
+
+@code {
+    private List<SubcategoryDto> subcategories = new();
+    private bool dialogVisible;
+    private string dialogTitle = string.Empty;
+    private MudForm? form;
+    private int? categoryId;
+    private string name = string.Empty;
+    private string? description;
+    private int? editingId;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync() => subcategories = (await ApiClient.GetAsync<List<SubcategoryDto>>(HttpFactory, "api/subcategories")) ?? new();
+
+    private void OpenCreate()
+    {
+        dialogTitle = "Nouvelle sous-catégorie";
+        editingId = null;
+        categoryId = null;
+        name = string.Empty;
+        description = null;
+        dialogVisible = true;
+    }
+
+    private void OpenEdit(SubcategoryDto dto)
+    {
+        dialogTitle = $"Modifier #" + dto.SubcategoryId;
+        editingId = dto.SubcategoryId;
+        categoryId = dto.CategoryId;
+        name = dto.Name;
+        description = dto.Description;
+        dialogVisible = true;
+    }
+
+    private async Task Save()
+    {
+        await form!.Validate();
+        if (!form.IsValid) return;
+
+        if (editingId is null)
+        {
+            var resp = await ApiClient.PostAsync(HttpFactory, "api/subcategories", new CreateSubcategoryDto(categoryId, name, description));
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de création", Severity.Error); return; }
+        }
+        else
+        {
+            var resp = await ApiClient.PutAsync(HttpFactory, $"api/subcategories/{editingId}", new UpdateSubcategoryDto(categoryId, name, description));
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise à jour", Severity.Error); return; }
+        }
+
+        dialogVisible = false;
+        await LoadAsync();
+        Snackbar.Add("Enregistré", Severity.Success);
+    }
+
+    private async Task Delete(SubcategoryDto dto)
+    {
+        var resp = await ApiClient.DeleteAsync(HttpFactory, $"api/subcategories/{dto.SubcategoryId}");
+        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression échouée", Severity.Error); return; }
+        await LoadAsync();
+        Snackbar.Add("Supprimé", Severity.Success);
+    }
+}

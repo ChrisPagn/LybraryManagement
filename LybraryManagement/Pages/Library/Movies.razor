@@ -1,0 +1,120 @@
+@page "/movies"
+@using MudBlazor
+@using LybraryManagement.Services
+@using LybraryManagement.Shared.Library.DTOs
+@inject IHttpClientFactory HttpFactory
+@inject ISnackbar Snackbar
+
+<PageTitle>Films</PageTitle>
+
+<MudPaper Class="pa-4">
+    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudText Typo="Typo.h5">Films</MudText>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreate">Ajouter</MudButton>
+    </MudStack>
+
+    <MudTable Items="movies" Dense="true" Hover="true" Class="mt-4">
+        <HeaderContent>
+            <MudTh>ID</MudTh>
+            <MudTh>ItemId</MudTh>
+            <MudTh>Durée</MudTh>
+            <MudTh>Note</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="ID">@context.MovieId</MudTd>
+            <MudTd DataLabel="ItemId">@context.ItemId</MudTd>
+            <MudTd DataLabel="Durée">@context.Duration</MudTd>
+            <MudTd DataLabel="Note">@context.Rating</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(context)" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@if (dialogVisible)
+{
+    <MudPaper Class="pa-4 mt-4">
+        <MudText Typo="Typo.h6">@dialogTitle</MudText>
+        <MudForm @ref="form">
+            <MudNumericField T="int" @bind-Value="itemId" Label="ItemId" Required="true" />
+            <MudTextField @bind-Value="durationText" Label="Durée (hh:mm:ss)" />
+            <MudTextField @bind-Value="rating" Label="Note" />
+        </MudForm>
+        <MudStack Row Spacing="2" Class="mt-2">
+            <MudButton OnClick="Save" Color="Color.Primary">Enregistrer</MudButton>
+            <MudButton OnClick="() => dialogVisible = false">Annuler</MudButton>
+        </MudStack>
+    </MudPaper>
+}
+
+@code {
+    private List<MovieDto> movies = new();
+    private bool dialogVisible;
+    private string dialogTitle = string.Empty;
+    private MudForm? form;
+    private int itemId;
+    private string? durationText;
+    private string? rating;
+    private int? editingId;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync() => movies = (await ApiClient.GetAsync<List<MovieDto>>(HttpFactory, "api/movies")) ?? new();
+
+    private void OpenCreate()
+    {
+        dialogTitle = "Nouveau film";
+        editingId = null;
+        itemId = 0;
+        durationText = null;
+        rating = null;
+        dialogVisible = true;
+    }
+
+    private void OpenEdit(MovieDto dto)
+    {
+        dialogTitle = $"Modifier #" + dto.MovieId;
+        editingId = dto.MovieId;
+        itemId = dto.ItemId;
+        durationText = dto.Duration?.ToString();
+        rating = dto.Rating;
+        dialogVisible = true;
+    }
+
+    private async Task Save()
+    {
+        await form!.Validate();
+        if (!form.IsValid) return;
+
+        // parse duration text
+        var duration = !string.IsNullOrWhiteSpace(durationText) && TimeSpan.TryParse(durationText, out var ts)
+            ? ts
+            : null as TimeSpan?;
+
+        if (editingId is null)
+        {
+            var resp = await ApiClient.PostAsync(HttpFactory, "api/movies", new CreateMovieDto(itemId, duration, rating));
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de création", Severity.Error); return; }
+        }
+        else
+        {
+            var resp = await ApiClient.PutAsync(HttpFactory, $"api/movies/{editingId}", new UpdateMovieDto(itemId, duration, rating));
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise à jour", Severity.Error); return; }
+        }
+
+        dialogVisible = false;
+        await LoadAsync();
+        Snackbar.Add("Enregistré", Severity.Success);
+    }
+
+    private async Task Delete(MovieDto dto)
+    {
+        var resp = await ApiClient.DeleteAsync(HttpFactory, $"api/movies/{dto.MovieId}");
+        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression échouée", Severity.Error); return; }
+        await LoadAsync();
+        Snackbar.Add("Supprimé", Severity.Success);
+    }
+}

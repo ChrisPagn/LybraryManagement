@@ -1,0 +1,135 @@
+@page "/items"
+@using MudBlazor
+@using LybraryManagement.Services
+@using LybraryManagement.Shared.Library.DTOs
+@inject IHttpClientFactory HttpFactory
+@inject ISnackbar Snackbar
+
+<PageTitle>Items</PageTitle>
+
+<MudPaper Class="pa-4">
+    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudText Typo="Typo.h5">Items</MudText>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreate">Ajouter</MudButton>
+    </MudStack>
+
+    <MudTable Items="items" Dense="true" Hover="true" Class="mt-4">
+        <HeaderContent>
+            <MudTh>ID</MudTh>
+            <MudTh>Titre</MudTh>
+            <MudTh>Auteur/Créateur</MudTh>
+            <MudTh>Éditeur</MudTh>
+            <MudTh>Année</MudTh>
+            <MudTh>SC Id</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="ID">@context.ItemId</MudTd>
+            <MudTd DataLabel="Titre">@context.Title</MudTd>
+            <MudTd DataLabel="Créateur">@context.Creator</MudTd>
+            <MudTd DataLabel="Éditeur">@context.Publisher</MudTd>
+            <MudTd DataLabel="Année">@context.Year</MudTd>
+            <MudTd DataLabel="SC Id">@context.SubcategoryId</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(context)" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@if (dialogVisible)
+{
+    <MudPaper Class="pa-4 mt-4">
+        <MudText Typo="Typo.h6">@dialogTitle</MudText>
+        <MudForm @ref="form">
+            <MudTextField @bind-Value="title" Label="Titre" Required="true" />
+            <MudTextField @bind-Value="creator" Label="Créateur" />
+            <MudTextField @bind-Value="publisher" Label="Éditeur" />
+            <MudNumericField T="int?" @bind-Value="year" Label="Année" />
+            <MudTextField @bind-Value="description" Label="Description" Lines="3" />
+            <MudNumericField T="int?" @bind-Value="subcategoryId" Label="Sous-catégorie Id" />
+            <MudTextField @bind-Value="imageUrl" Label="Image URL" />
+        </MudForm>
+        <MudStack Row Spacing="2" Class="mt-2">
+            <MudButton OnClick="Save" Color="Color.Primary">Enregistrer</MudButton>
+            <MudButton OnClick="() => dialogVisible = false">Annuler</MudButton>
+        </MudStack>
+    </MudPaper>
+}
+
+@code {
+    private List<ItemDto> items = new();
+    private bool dialogVisible;
+    private string dialogTitle = string.Empty;
+    private MudForm? form;
+    private string title = string.Empty;
+    private string? creator;
+    private string? publisher;
+    private int? year;
+    private string? description;
+    private int? subcategoryId;
+    private string? imageUrl;
+    private int? editingId;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync() => items = (await ApiClient.GetAsync<List<ItemDto>>(HttpFactory, "api/items")) ?? new();
+
+    private void OpenCreate()
+    {
+        dialogTitle = "Nouvel item";
+        editingId = null;
+        title = string.Empty;
+        creator = null;
+        publisher = null;
+        year = null;
+        description = null;
+        subcategoryId = null;
+        imageUrl = null;
+        dialogVisible = true;
+    }
+
+    private void OpenEdit(ItemDto dto)
+    {
+        dialogTitle = $"Modifier #" + dto.ItemId;
+        editingId = dto.ItemId;
+        title = dto.Title;
+        creator = dto.Creator;
+        publisher = dto.Publisher;
+        year = dto.Year;
+        description = dto.Description;
+        subcategoryId = dto.SubcategoryId;
+        imageUrl = dto.ImageUrl;
+        dialogVisible = true;
+    }
+
+    private async Task Save()
+    {
+        await form!.Validate();
+        if (!form.IsValid) return;
+
+        if (editingId is null)
+        {
+            var resp = await ApiClient.PostAsync(HttpFactory, "api/items", new CreateItemDto(title, creator, publisher, year, description, subcategoryId, imageUrl));
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de création", Severity.Error); return; }
+        }
+        else
+        {
+            var resp = await ApiClient.PutAsync(HttpFactory, $"api/items/{editingId}", new UpdateItemDto(title, creator, publisher, year, description, subcategoryId, imageUrl));
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise à jour", Severity.Error); return; }
+        }
+
+        dialogVisible = false;
+        await LoadAsync();
+        Snackbar.Add("Enregistré", Severity.Success);
+    }
+
+    private async Task Delete(ItemDto dto)
+    {
+        var resp = await ApiClient.DeleteAsync(HttpFactory, $"api/items/{dto.ItemId}");
+        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression échouée", Severity.Error); return; }
+        await LoadAsync();
+        Snackbar.Add("Supprimé", Severity.Success);
+    }
+}

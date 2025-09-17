@@ -1,0 +1,103 @@
+@page "/genres"
+@using MudBlazor
+@using LybraryManagement.Services
+@using LybraryManagement.Shared.Library.DTOs
+@inject IHttpClientFactory HttpFactory
+@inject ISnackbar Snackbar
+
+<PageTitle>Genres</PageTitle>
+
+<MudPaper Class="pa-4">
+    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudText Typo="Typo.h5">Genres</MudText>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreate">Ajouter</MudButton>
+    </MudStack>
+
+    <MudTable Items="genres" Dense="true" Hover="true" Class="mt-4">
+        <HeaderContent>
+            <MudTh>ID</MudTh>
+            <MudTh>Nom</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="ID">@context.GenreId</MudTd>
+            <MudTd DataLabel="Nom">@context.Name</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(context)" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@if (dialogVisible)
+{
+    <MudPaper Class="pa-4 mt-4">
+        <MudText Typo="Typo.h6">@dialogTitle</MudText>
+        <MudForm @ref="form">
+            <MudTextField @bind-Value="name" Label="Nom" Required="true" />
+        </MudForm>
+        <MudStack Row Spacing="2" Class="mt-2">
+            <MudButton OnClick="Save" Color="Color.Primary">Enregistrer</MudButton>
+            <MudButton OnClick="() => dialogVisible = false">Annuler</MudButton>
+        </MudStack>
+    </MudPaper>
+}
+
+@code {
+    private List<GenreDto> genres = new();
+    private bool dialogVisible;
+    private string dialogTitle = string.Empty;
+    private MudForm? form;
+    private string name = string.Empty;
+    private int? editingId;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync() => genres = (await ApiClient.GetAsync<List<GenreDto>>(HttpFactory, "api/genres")) ?? new();
+
+    private void OpenCreate()
+    {
+        dialogTitle = "Nouveau genre";
+        editingId = null;
+        name = string.Empty;
+        dialogVisible = true;
+    }
+
+    private void OpenEdit(GenreDto dto)
+    {
+        dialogTitle = $"Modifier #" + dto.GenreId;
+        editingId = dto.GenreId;
+        name = dto.Name;
+        dialogVisible = true;
+    }
+
+    private async Task Save()
+    {
+        await form!.Validate();
+        if (!form.IsValid) return;
+
+        if (editingId is null)
+        {
+            var resp = await ApiClient.PostAsync(HttpFactory, "api/genres", new CreateGenreDto(name));
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de création", Severity.Error); return; }
+        }
+        else
+        {
+            var resp = await ApiClient.PutAsync(HttpFactory, $"api/genres/{editingId}", new UpdateGenreDto(name));
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise à jour", Severity.Error); return; }
+        }
+
+        dialogVisible = false;
+        await LoadAsync();
+        Snackbar.Add("Enregistré", Severity.Success);
+    }
+
+    private async Task Delete(GenreDto dto)
+    {
+        var resp = await ApiClient.DeleteAsync(HttpFactory, $"api/genres/{dto.GenreId}");
+        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression échouée", Severity.Error); return; }
+        await LoadAsync();
+        Snackbar.Add("Supprimé", Severity.Success);
+    }
+}

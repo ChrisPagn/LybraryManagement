@@ -1,0 +1,111 @@
+@page "/categories"
+@using MudBlazor
+@using LybraryManagement.Services
+@using LybraryManagement.Shared.Library.DTOs
+@inject IHttpClientFactory HttpFactory
+@inject ISnackbar Snackbar
+
+<PageTitle>Catégories</PageTitle>
+
+<MudPaper Class="pa-4">
+    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudText Typo="Typo.h5">Catégories</MudText>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreate">Ajouter</MudButton>
+    </MudStack>
+
+    <MudTable Items="categories" Dense="true" Hover="true" Class="mt-4">
+        <HeaderContent>
+            <MudTh>ID</MudTh>
+            <MudTh>Nom</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="ID">@context.CategoryId</MudTd>
+            <MudTd DataLabel="Nom">@context.Name</MudTd>
+            <MudTd DataLabel="Description">@context.Description</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(context)" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@if (dialogVisible)
+{
+    <MudPaper Class="pa-4 mt-4">
+        <MudText Typo="Typo.h6">@dialogTitle</MudText>
+        <MudForm @ref="form">
+            <MudTextField @bind-Value="name" Label="Nom" Required="true" />
+            <MudTextField @bind-Value="description" Label="Description" />
+        </MudForm>
+        <MudStack Row Spacing="2" Class="mt-2">
+            <MudButton OnClick="Save" Color="Color.Primary">Enregistrer</MudButton>
+            <MudButton OnClick="() => dialogVisible = false">Annuler</MudButton>
+        </MudStack>
+    </MudPaper>
+}
+
+@code {
+    private List<CategoryDto> categories = new();
+    private bool dialogVisible;
+    private string dialogTitle = string.Empty;
+    private MudForm? form;
+    private string name = string.Empty;
+    private string? description;
+    private int? editingId;
+
+    protected override async Task OnInitializedAsync()
+        => await LoadAsync();
+
+    private async Task LoadAsync()
+        => categories = (await ApiClient.GetAsync<List<CategoryDto>>(HttpFactory, "api/categories")) ?? new();
+
+    private void OpenCreate()
+    {
+        dialogTitle = "Nouvelle catégorie";
+        editingId = null;
+        name = string.Empty;
+        description = null;
+        dialogVisible = true;
+    }
+
+    private void OpenEdit(CategoryDto dto)
+    {
+        dialogTitle = $"Modifier #" + dto.CategoryId;
+        editingId = dto.CategoryId;
+        name = dto.Name;
+        description = dto.Description;
+        dialogVisible = true;
+    }
+
+    private async Task Save()
+    {
+        await form!.Validate();
+        if (!form.IsValid) return;
+
+        if (editingId is null)
+        {
+            var resp = await ApiClient.PostAsync(HttpFactory, "api/categories", new CreateCategoryDto(name, description));
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de création", Severity.Error); return; }
+        }
+        else
+        {
+            var resp = await ApiClient.PutAsync(HttpFactory, $"api/categories/{editingId}", new UpdateCategoryDto(name, description));
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise à jour", Severity.Error); return; }
+        }
+
+        dialogVisible = false;
+        await LoadAsync();
+        Snackbar.Add("Enregistré", Severity.Success);
+    }
+
+    private async Task Delete(CategoryDto dto)
+    {
+        var resp = await ApiClient.DeleteAsync(HttpFactory, $"api/categories/{dto.CategoryId}");
+        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression échouée", Severity.Error); return; }
+        await LoadAsync();
+        Snackbar.Add("Supprimé", Severity.Success);
+    }
+}

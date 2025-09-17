@@ -1,0 +1,16 @@
+﻿# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build outputs
+bin/
+obj/
+out/
+
+# Logs
+*.log
+
+# Autres fichiers temporaires
+*.db
+*.vsidx
