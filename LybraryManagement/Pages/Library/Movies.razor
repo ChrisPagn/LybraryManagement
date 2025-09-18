@@ -17,14 +17,22 @@
         <HeaderContent>
             <MudTh>ID</MudTh>
             <MudTh>ItemId</MudTh>
-            <MudTh>Durée</MudTh>
+            <MudTh>Titre</MudTh>
+            <MudTh>Createur</MudTh>
+            <MudTh>Editeur</MudTh>
+            <MudTh>Annee</MudTh>
+            <MudTh>Duree</MudTh>
             <MudTh>Note</MudTh>
             <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="ID">@context.MovieId</MudTd>
             <MudTd DataLabel="ItemId">@context.ItemId</MudTd>
-            <MudTd DataLabel="Durée">@context.Duration</MudTd>
+            <MudTd DataLabel="Titre">@context.Item?.Title</MudTd>
+            <MudTd DataLabel="Createur">@context.Item?.Creator</MudTd>
+            <MudTd DataLabel="Editeur">@context.Item?.Publisher</MudTd>
+            <MudTd DataLabel="Annee">@context.Item?.Year</MudTd>
+            <MudTd DataLabel="Duree">@context.Duration</MudTd>
             <MudTd DataLabel="Note">@context.Rating</MudTd>
             <MudTd>
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
@@ -40,7 +48,7 @@
         <MudText Typo="Typo.h6">@dialogTitle</MudText>
         <MudForm @ref="form">
             <MudNumericField T="int" @bind-Value="itemId" Label="ItemId" Required="true" />
-            <MudTextField @bind-Value="durationText" Label="Durée (hh:mm:ss)" />
+            <MudTextField @bind-Value="durationText" Label="Duree (hh:mm:ss)" />
             <MudTextField @bind-Value="rating" Label="Note" />
         </MudForm>
         <MudStack Row Spacing="2" Class="mt-2">
@@ -89,7 +97,6 @@
         await form!.Validate();
         if (!form.IsValid) return;
 
-        // parse duration text
         var duration = !string.IsNullOrWhiteSpace(durationText) && TimeSpan.TryParse(durationText, out var ts)
             ? ts
             : null as TimeSpan?;
@@ -97,24 +104,25 @@
         if (editingId is null)
         {
             var resp = await ApiClient.PostAsync(HttpFactory, "api/movies", new CreateMovieDto(itemId, duration, rating));
-            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de création", Severity.Error); return; }
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de creation", Severity.Error); return; }
         }
         else
         {
             var resp = await ApiClient.PutAsync(HttpFactory, $"api/movies/{editingId}", new UpdateMovieDto(itemId, duration, rating));
-            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise à jour", Severity.Error); return; }
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise a jour", Severity.Error); return; }
         }
 
         dialogVisible = false;
         await LoadAsync();
-        Snackbar.Add("Enregistré", Severity.Success);
+        Snackbar.Add("Enregistre", Severity.Success);
     }
 
     private async Task Delete(MovieDto dto)
     {
         var resp = await ApiClient.DeleteAsync(HttpFactory, $"api/movies/{dto.MovieId}");
-        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression échouée", Severity.Error); return; }
+        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression echouee", Severity.Error); return; }
         await LoadAsync();
-        Snackbar.Add("Supprimé", Severity.Success);
+        Snackbar.Add("Supprime", Severity.Success);
     }
 }
+

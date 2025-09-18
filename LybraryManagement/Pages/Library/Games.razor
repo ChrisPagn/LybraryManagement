@@ -17,15 +17,23 @@
         <HeaderContent>
             <MudTh>ID</MudTh>
             <MudTh>ItemId</MudTh>
+            <MudTh>Titre</MudTh>
+            <MudTh>Createur</MudTh>
+            <MudTh>Editeur</MudTh>
+            <MudTh>Annee</MudTh>
             <MudTh>Plateforme</MudTh>
-            <MudTh>Âge</MudTh>
+            <MudTh>Age</MudTh>
             <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="ID">@context.GameId</MudTd>
             <MudTd DataLabel="ItemId">@context.ItemId</MudTd>
+            <MudTd DataLabel="Titre">@context.Item?.Title</MudTd>
+            <MudTd DataLabel="Createur">@context.Item?.Creator</MudTd>
+            <MudTd DataLabel="Editeur">@context.Item?.Publisher</MudTd>
+            <MudTd DataLabel="Annee">@context.Item?.Year</MudTd>
             <MudTd DataLabel="Plateforme">@context.Platform</MudTd>
-            <MudTd DataLabel="Âge">@context.AgeRange</MudTd>
+            <MudTd DataLabel="Age">@context.AgeRange</MudTd>
             <MudTd>
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(context)" />
@@ -41,7 +49,7 @@
         <MudForm @ref="form">
             <MudNumericField T="int" @bind-Value="itemId" Label="ItemId" Required="true" />
             <MudTextField @bind-Value="platform" Label="Plateforme" />
-            <MudTextField @bind-Value="ageRange" Label="Âge" />
+            <MudTextField @bind-Value="ageRange" Label="Age" />
         </MudForm>
         <MudStack Row Spacing="2" Class="mt-2">
             <MudButton OnClick="Save" Color="Color.Primary">Enregistrer</MudButton>
@@ -92,24 +100,25 @@
         if (editingId is null)
         {
             var resp = await ApiClient.PostAsync(HttpFactory, "api/games", new CreateGameDto(itemId, platform, ageRange));
-            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de création", Severity.Error); return; }
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de creation", Severity.Error); return; }
         }
         else
         {
             var resp = await ApiClient.PutAsync(HttpFactory, $"api/games/{editingId}", new UpdateGameDto(itemId, platform, ageRange));
-            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise à jour", Severity.Error); return; }
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise a jour", Severity.Error); return; }
         }
 
         dialogVisible = false;
         await LoadAsync();
-        Snackbar.Add("Enregistré", Severity.Success);
+        Snackbar.Add("Enregistre", Severity.Success);
     }
 
     private async Task Delete(GameDto dto)
     {
         var resp = await ApiClient.DeleteAsync(HttpFactory, $"api/games/{dto.GameId}");
-        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression échouée", Severity.Error); return; }
+        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression echouee", Severity.Error); return; }
         await LoadAsync();
-        Snackbar.Add("Supprimé", Severity.Success);
+        Snackbar.Add("Supprime", Severity.Success);
     }
 }
+

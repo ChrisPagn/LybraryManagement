@@ -17,7 +17,10 @@
         <HeaderContent>
             <MudTh>ID</MudTh>
             <MudTh>ItemId</MudTh>
-            <MudTh>BookName</MudTh>
+            <MudTh>Titre</MudTh>
+            <MudTh>Createur</MudTh>
+            <MudTh>Editeur</MudTh>
+            <MudTh>Annee</MudTh>
             <MudTh>GenreId</MudTh>
             <MudTh>ISBN</MudTh>
             <MudTh></MudTh>
@@ -25,7 +28,10 @@
         <RowTemplate>
             <MudTd DataLabel="ID">@context.BookId</MudTd>
             <MudTd DataLabel="ItemId">@context.ItemId</MudTd>
-            <MudTd DataLabel="BookName">@context.ItemId</MudTd>
+            <MudTd DataLabel="Titre">@context.Item?.Title</MudTd>
+            <MudTd DataLabel="Createur">@context.Item?.Creator</MudTd>
+            <MudTd DataLabel="Editeur">@context.Item?.Publisher</MudTd>
+            <MudTd DataLabel="Annee">@context.Item?.Year</MudTd>
             <MudTd DataLabel="GenreId">@context.GenreId</MudTd>
             <MudTd DataLabel="ISBN">@context.Isbn</MudTd>
             <MudTd>
@@ -53,5 +59,6 @@
 }
 
 @code {
- 
+
 }
+
