@@ -1,4 +1,5 @@
 @page "/items"
+@using System.Linq
 @using MudBlazor
 @using LybraryManagement.Services
 @using LybraryManagement.Shared.Library.DTOs
@@ -13,22 +14,28 @@
         <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreate">Ajouter</MudButton>
     </MudStack>
 
-    <MudTable Items="items" Dense="true" Hover="true" Class="mt-4">
+    <MudStack Row Spacing="1" Class="mt-2">
+        <MudButton Color="Color.Primary" Variant="@GetVariant(ItemFilter.Books)" OnClick="@(() => SetFilter(ItemFilter.Books))">Livres</MudButton>
+        <MudButton Color="Color.Primary" Variant="@GetVariant(ItemFilter.Games)" OnClick="@(() => SetFilter(ItemFilter.Games))">Jeux</MudButton>
+        <MudButton Color="Color.Primary" Variant="@GetVariant(ItemFilter.Movies)" OnClick="@(() => SetFilter(ItemFilter.Movies))">Films</MudButton>
+    </MudStack>
+
+    <MudTable Items="FilteredItems" Dense="true" Hover="true" Class="mt-4">
         <HeaderContent>
             <MudTh>ID</MudTh>
             <MudTh>Titre</MudTh>
-            <MudTh>Auteur/Créateur</MudTh>
-            <MudTh>Éditeur</MudTh>
-            <MudTh>Année</MudTh>
+            <MudTh>Auteur/Createur</MudTh>
+            <MudTh>Editeur</MudTh>
+            <MudTh>Annee</MudTh>
             <MudTh>SC Id</MudTh>
             <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="ID">@context.ItemId</MudTd>
             <MudTd DataLabel="Titre">@context.Title</MudTd>
-            <MudTd DataLabel="Créateur">@context.Creator</MudTd>
-            <MudTd DataLabel="Éditeur">@context.Publisher</MudTd>
-            <MudTd DataLabel="Année">@context.Year</MudTd>
+            <MudTd DataLabel="Createur">@context.Creator</MudTd>
+            <MudTd DataLabel="Editeur">@context.Publisher</MudTd>
+            <MudTd DataLabel="Annee">@context.Year</MudTd>
             <MudTd DataLabel="SC Id">@context.SubcategoryId</MudTd>
             <MudTd>
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
@@ -44,11 +51,11 @@
         <MudText Typo="Typo.h6">@dialogTitle</MudText>
         <MudForm @ref="form">
             <MudTextField @bind-Value="title" Label="Titre" Required="true" />
-            <MudTextField @bind-Value="creator" Label="Créateur" />
-            <MudTextField @bind-Value="publisher" Label="Éditeur" />
-            <MudNumericField T="int?" @bind-Value="year" Label="Année" />
+            <MudTextField @bind-Value="creator" Label="Createur" />
+            <MudTextField @bind-Value="publisher" Label="Editeur" />
+            <MudNumericField T="int?" @bind-Value="year" Label="Annee" />
             <MudTextField @bind-Value="description" Label="Description" Lines="3" />
-            <MudNumericField T="int?" @bind-Value="subcategoryId" Label="Sous-catégorie Id" />
+            <MudNumericField T="int?" @bind-Value="subcategoryId" Label="Sous-categorie Id" />
             <MudTextField @bind-Value="imageUrl" Label="Image URL" />
         </MudForm>
         <MudStack Row Spacing="2" Class="mt-2">
@@ -60,6 +67,9 @@
 
 @code {
     private List<ItemDto> items = new();
+    private HashSet<int> bookItemIds = new();
+    private HashSet<int> gameItemIds = new();
+    private HashSet<int> movieItemIds = new();
     private bool dialogVisible;
     private string dialogTitle = string.Empty;
     private MudForm? form;
@@ -71,10 +81,30 @@
     private int? subcategoryId;
     private string? imageUrl;
     private int? editingId;
+    private ItemFilter currentFilter = ItemFilter.All;
+
+    private IEnumerable<ItemDto> FilteredItems => currentFilter switch
+    {
+        ItemFilter.Books => items.Where(i => bookItemIds.Contains(i.ItemId)),
+        ItemFilter.Games => items.Where(i => gameItemIds.Contains(i.ItemId)),
+        ItemFilter.Movies => items.Where(i => movieItemIds.Contains(i.ItemId)),
+        _ => items
+    };
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
-    private async Task LoadAsync() => items = (await ApiClient.GetAsync<List<ItemDto>>(HttpFactory, "api/items")) ?? new();
+    private async Task LoadAsync()
+    {
+        var allItems = await ApiClient.GetAsync<List<ItemDto>>(HttpFactory, "api/items");
+        var books = await ApiClient.GetAsync<List<BookDto>>(HttpFactory, "api/books");
+        var games = await ApiClient.GetAsync<List<GameDto>>(HttpFactory, "api/games");
+        var movies = await ApiClient.GetAsync<List<MovieDto>>(HttpFactory, "api/movies");
+
+        items = allItems ?? new();
+        bookItemIds = books?.Select(b => b.ItemId).ToHashSet() ?? new HashSet<int>();
+        gameItemIds = games?.Select(g => g.ItemId).ToHashSet() ?? new HashSet<int>();
+        movieItemIds = movies?.Select(m => m.ItemId).ToHashSet() ?? new HashSet<int>();
+    }
 
     private void OpenCreate()
     {
@@ -92,7 +122,7 @@
 
     private void OpenEdit(ItemDto dto)
     {
-        dialogTitle = $"Modifier #" + dto.ItemId;
+        dialogTitle = $"Modifier #{dto.ItemId}";
         editingId = dto.ItemId;
         title = dto.Title;
         creator = dto.Creator;
@@ -112,24 +142,41 @@
         if (editingId is null)
         {
             var resp = await ApiClient.PostAsync(HttpFactory, "api/items", new CreateItemDto(title, creator, publisher, year, description, subcategoryId, imageUrl));
-            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de création", Severity.Error); return; }
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de creation", Severity.Error); return; }
         }
         else
         {
             var resp = await ApiClient.PutAsync(HttpFactory, $"api/items/{editingId}", new UpdateItemDto(title, creator, publisher, year, description, subcategoryId, imageUrl));
-            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise à jour", Severity.Error); return; }
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise a jour", Severity.Error); return; }
         }
 
         dialogVisible = false;
         await LoadAsync();
-        Snackbar.Add("Enregistré", Severity.Success);
+        Snackbar.Add("Enregistre", Severity.Success);
     }
 
     private async Task Delete(ItemDto dto)
     {
         var resp = await ApiClient.DeleteAsync(HttpFactory, $"api/items/{dto.ItemId}");
-        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression échouée", Severity.Error); return; }
+        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression echouee", Severity.Error); return; }
         await LoadAsync();
-        Snackbar.Add("Supprimé", Severity.Success);
+        Snackbar.Add("Supprime", Severity.Success);
+    }
+
+    private void SetFilter(ItemFilter filter)
+    {
+        currentFilter = currentFilter == filter ? ItemFilter.All : filter;
+    }
+
+    private Variant GetVariant(ItemFilter filter)
+        => currentFilter == filter ? Variant.Filled : Variant.Outlined;
+
+    private enum ItemFilter
+    {
+        All,
+        Books,
+        Games,
+        Movies
     }
 }
+
