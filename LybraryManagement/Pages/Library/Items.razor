@@ -5,6 +5,7 @@
 @using LybraryManagement.Shared.Library.DTOs
 @inject IHttpClientFactory HttpFactory
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <PageTitle>Items</PageTitle>
 
@@ -38,49 +39,28 @@
             <MudTd DataLabel="Annee">@context.Year</MudTd>
             <MudTd DataLabel="SC Id">@context.SubcategoryId</MudTd>
             <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="async () => await OpenEdit(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="async () => await Delete(context)" />
             </MudTd>
         </RowTemplate>
     </MudTable>
 </MudPaper>
 
-@if (dialogVisible)
-{
-    <MudPaper Class="pa-4 mt-4">
-        <MudText Typo="Typo.h6">@dialogTitle</MudText>
-        <MudForm @ref="form">
-            <MudTextField @bind-Value="title" Label="Titre" Required="true" />
-            <MudTextField @bind-Value="creator" Label="Createur" />
-            <MudTextField @bind-Value="publisher" Label="Editeur" />
-            <MudNumericField T="int?" @bind-Value="year" Label="Annee" />
-            <MudTextField @bind-Value="description" Label="Description" Lines="3" />
-            <MudNumericField T="int?" @bind-Value="subcategoryId" Label="Sous-categorie Id" />
-            <MudTextField @bind-Value="imageUrl" Label="Image URL" />
-        </MudForm>
-        <MudStack Row Spacing="2" Class="mt-2">
-            <MudButton OnClick="Save" Color="Color.Primary">Enregistrer</MudButton>
-            <MudButton OnClick="() => dialogVisible = false">Annuler</MudButton>
-        </MudStack>
-    </MudPaper>
-}
-
 @code {
+    private enum ItemFilter
+    {
+        All,
+        Books,
+        Games,
+        Movies
+    }
+
     private List<ItemDto> items = new();
     private HashSet<int> bookItemIds = new();
     private HashSet<int> gameItemIds = new();
     private HashSet<int> movieItemIds = new();
-    private bool dialogVisible;
-    private string dialogTitle = string.Empty;
-    private MudForm? form;
-    private string title = string.Empty;
-    private string? creator;
-    private string? publisher;
-    private int? year;
-    private string? description;
-    private int? subcategoryId;
-    private string? imageUrl;
-    private int? editingId;
+    private List<CategoryDto> categories = new();
+    private List<SubcategoryDto> subcategories = new();
     private ItemFilter currentFilter = ItemFilter.All;
 
     private IEnumerable<ItemDto> FilteredItems => currentFilter switch
@@ -99,84 +79,87 @@
         var books = await ApiClient.GetAsync<List<BookDto>>(HttpFactory, "api/books");
         var games = await ApiClient.GetAsync<List<GameDto>>(HttpFactory, "api/games");
         var movies = await ApiClient.GetAsync<List<MovieDto>>(HttpFactory, "api/movies");
+        var categoryList = await ApiClient.GetAsync<List<CategoryDto>>(HttpFactory, "api/categories");
+        var subcategoryList = await ApiClient.GetAsync<List<SubcategoryDto>>(HttpFactory, "api/subcategories");
 
-        items = allItems ?? new();
+        items = allItems ?? new List<ItemDto>();
         bookItemIds = books?.Select(b => b.ItemId).ToHashSet() ?? new HashSet<int>();
         gameItemIds = games?.Select(g => g.ItemId).ToHashSet() ?? new HashSet<int>();
         movieItemIds = movies?.Select(m => m.ItemId).ToHashSet() ?? new HashSet<int>();
+        categories = categoryList ?? new List<CategoryDto>();
+        subcategories = subcategoryList ?? new List<SubcategoryDto>();
     }
 
-    private void OpenCreate()
+    private async Task OpenCreate()
     {
-        dialogTitle = "Nouvel item";
-        editingId = null;
-        title = string.Empty;
-        creator = null;
-        publisher = null;
-        year = null;
-        description = null;
-        subcategoryId = null;
-        imageUrl = null;
-        dialogVisible = true;
-    }
+        var result = await ShowDialogAsync(null, "Nouvel item");
+        if (result is null) return;
 
-    private void OpenEdit(ItemDto dto)
-    {
-        dialogTitle = $"Modifier #{dto.ItemId}";
-        editingId = dto.ItemId;
-        title = dto.Title;
-        creator = dto.Creator;
-        publisher = dto.Publisher;
-        year = dto.Year;
-        description = dto.Description;
-        subcategoryId = dto.SubcategoryId;
-        imageUrl = dto.ImageUrl;
-        dialogVisible = true;
-    }
-
-    private async Task Save()
-    {
-        await form!.Validate();
-        if (!form.IsValid) return;
-
-        if (editingId is null)
+        var response = await ApiClient.PostAsync(HttpFactory, "api/items", new CreateItemDto(result.Title, result.Creator, result.Publisher, result.Year, result.Description, result.SubcategoryId, result.ImageUrl));
+        if (!response.IsSuccessStatusCode)
         {
-            var resp = await ApiClient.PostAsync(HttpFactory, "api/items", new CreateItemDto(title, creator, publisher, year, description, subcategoryId, imageUrl));
-            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de creation", Severity.Error); return; }
-        }
-        else
-        {
-            var resp = await ApiClient.PutAsync(HttpFactory, $"api/items/{editingId}", new UpdateItemDto(title, creator, publisher, year, description, subcategoryId, imageUrl));
-            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise a jour", Severity.Error); return; }
+            Snackbar.Add("Erreur de creation", Severity.Error);
+            return;
         }
 
-        dialogVisible = false;
-        await LoadAsync();
         Snackbar.Add("Enregistre", Severity.Success);
+        await LoadAsync();
+    }
+
+    private async Task OpenEdit(ItemDto dto)
+    {
+        var result = await ShowDialogAsync(dto, $"Modifier #{dto.ItemId}");
+        if (result is null) return;
+
+        var response = await ApiClient.PutAsync(HttpFactory, $"api/items/{dto.ItemId}", new UpdateItemDto(result.Title, result.Creator, result.Publisher, result.Year, result.Description, result.SubcategoryId, result.ImageUrl));
+        if (!response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Erreur de mise a jour", Severity.Error);
+            return;
+        }
+
+        Snackbar.Add("Enregistre", Severity.Success);
+        await LoadAsync();
     }
 
     private async Task Delete(ItemDto dto)
     {
-        var resp = await ApiClient.DeleteAsync(HttpFactory, $"api/items/{dto.ItemId}");
-        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression echouee", Severity.Error); return; }
+        var response = await ApiClient.DeleteAsync(HttpFactory, $"api/items/{dto.ItemId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Suppression echouee", Severity.Error);
+            return;
+        }
+
         await LoadAsync();
         Snackbar.Add("Supprime", Severity.Success);
     }
 
-    private void SetFilter(ItemFilter filter)
+    private async Task<ItemDialogResult?> ShowDialogAsync(ItemDto? item, string title)
     {
-        currentFilter = currentFilter == filter ? ItemFilter.All : filter;
+        var parameters = new DialogParameters
+        {
+            { nameof(ItemDialog.Item), item },
+            { nameof(ItemDialog.Categories), categories },
+            { nameof(ItemDialog.Subcategories), subcategories }
+        };
+
+        var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true };
+        var dialogReference = await DialogService.ShowAsync<ItemDialog>(title, parameters, options);
+
+        var dialogResult = await dialogReference.Result;
+
+        if (dialogResult is not { Canceled: false, Data: ItemDialogResult data })
+        {
+            return null;
+        }
+
+        return data;
     }
+
+    private void SetFilter(ItemFilter filter)
+        => currentFilter = currentFilter == filter ? ItemFilter.All : filter;
 
     private Variant GetVariant(ItemFilter filter)
         => currentFilter == filter ? Variant.Filled : Variant.Outlined;
-
-    private enum ItemFilter
-    {
-        All,
-        Books,
-        Games,
-        Movies
-    }
 }
-
