@@ -5,7 +5,6 @@
 @using LybraryManagement.Shared.Library.DTOs
 @inject IHttpClientFactory HttpFactory
 @inject ISnackbar Snackbar
-@inject IDialogService DialogService
 
 <PageTitle>Items</PageTitle>
 
@@ -39,12 +38,43 @@
             <MudTd DataLabel="Annee">@context.Year</MudTd>
             <MudTd DataLabel="SC Id">@context.SubcategoryId</MudTd>
             <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="async () => await OpenEdit(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="async () => await Delete(context)" />
             </MudTd>
         </RowTemplate>
     </MudTable>
 </MudPaper>
+
+@if (dialogVisible)
+{
+    <MudPaper Class="pa-4 mt-4">
+        <MudText Typo="Typo.h6">@dialogTitle</MudText>
+        <MudForm @ref="form">
+            <MudTextField @bind-Value="title" Label="Titre" Required="true" />
+            <MudTextField @bind-Value="creator" Label="Createur" />
+            <MudTextField @bind-Value="publisher" Label="Editeur" />
+            <MudNumericField T="int?" @bind-Value="year" Label="Annee" />
+            <MudTextField @bind-Value="description" Label="Description" Lines="3" />
+            <MudSelect T="int?" Label="Categorie" @bind-Value="selectedCategoryId" Clearable="true" Placeholder="Toutes categories">
+                @foreach (var category in categories)
+                {
+                    <MudSelectItem Value="@((int?)category.CategoryId)">@category.Name</MudSelectItem>
+                }
+            </MudSelect>
+            <MudSelect T="int?" Label="Sous-categorie" @bind-Value="subcategoryId" Clearable="true" Placeholder="Sans sous-categorie">
+                @foreach (var subcategory in FilteredSubcategories)
+                {
+                    <MudSelectItem Value="@((int?)subcategory.SubcategoryId)">@subcategory.Name</MudSelectItem>
+                }
+            </MudSelect>
+            <MudTextField @bind-Value="imageUrl" Label="Image URL" />
+        </MudForm>
+        <MudStack Row Spacing="2" Class="mt-2">
+            <MudButton OnClick="Save" Color="Color.Primary">Enregistrer</MudButton>
+            <MudButton OnClick="() => dialogVisible = false">Annuler</MudButton>
+        </MudStack>
+    </MudPaper>
+}
 
 @code {
     private enum ItemFilter
@@ -63,6 +93,19 @@
     private List<SubcategoryDto> subcategories = new();
     private ItemFilter currentFilter = ItemFilter.All;
 
+    private bool dialogVisible;
+    private string dialogTitle = string.Empty;
+    private MudForm? form;
+    private string title = string.Empty;
+    private string? creator;
+    private string? publisher;
+    private int? year;
+    private string? description;
+    private int? subcategoryId;
+    private string? imageUrl;
+    private int? selectedCategoryId;
+    private int? editingId;
+
     private IEnumerable<ItemDto> FilteredItems => currentFilter switch
     {
         ItemFilter.Books => items.Where(i => bookItemIds.Contains(i.ItemId)),
@@ -70,6 +113,10 @@
         ItemFilter.Movies => items.Where(i => movieItemIds.Contains(i.ItemId)),
         _ => items
     };
+
+    private IEnumerable<SubcategoryDto> FilteredSubcategories => selectedCategoryId.HasValue
+        ? subcategories.Where(s => s.CategoryId == selectedCategoryId)
+        : subcategories;
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
@@ -90,36 +137,93 @@
         subcategories = subcategoryList ?? new List<SubcategoryDto>();
     }
 
-    private async Task OpenCreate()
+    private void OpenCreate()
     {
-        var result = await ShowDialogAsync(null, "Nouvel item");
-        if (result is null) return;
-
-        var response = await ApiClient.PostAsync(HttpFactory, "api/items", new CreateItemDto(result.Title, result.Creator, result.Publisher, result.Year, result.Description, result.SubcategoryId, result.ImageUrl));
-        if (!response.IsSuccessStatusCode)
-        {
-            Snackbar.Add("Erreur de creation", Severity.Error);
-            return;
-        }
-
-        Snackbar.Add("Enregistre", Severity.Success);
-        await LoadAsync();
+        dialogTitle = "Nouvel item";
+        editingId = null;
+        title = string.Empty;
+        creator = null;
+        publisher = null;
+        year = null;
+        description = null;
+        subcategoryId = null;
+        imageUrl = null;
+        selectedCategoryId = null;
+        dialogVisible = true;
     }
 
-    private async Task OpenEdit(ItemDto dto)
+    private void OpenEdit(ItemDto dto)
     {
-        var result = await ShowDialogAsync(dto, $"Modifier #{dto.ItemId}");
-        if (result is null) return;
+        dialogTitle = $"Modifier #{dto.ItemId}";
+        editingId = dto.ItemId;
+        title = dto.Title;
+        creator = dto.Creator;
+        publisher = dto.Publisher;
+        year = dto.Year;
+        description = dto.Description;
+        subcategoryId = dto.SubcategoryId;
+        imageUrl = dto.ImageUrl;
 
-        var response = await ApiClient.PutAsync(HttpFactory, $"api/items/{dto.ItemId}", new UpdateItemDto(result.Title, result.Creator, result.Publisher, result.Year, result.Description, result.SubcategoryId, result.ImageUrl));
-        if (!response.IsSuccessStatusCode)
+        if (subcategoryId.HasValue)
+            selectedCategoryId = subcategories.FirstOrDefault(s => s.SubcategoryId == subcategoryId)?.CategoryId;
+        else
+            selectedCategoryId = null;
+
+        dialogVisible = true;
+    }
+
+    private async Task Save()
+    {
+        await form!.Validate();
+        if (!form.IsValid) return;
+
+        var trimmedTitle = title?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(trimmedTitle))
         {
-            Snackbar.Add("Erreur de mise a jour", Severity.Error);
+            Snackbar.Add("Le titre est requis", Severity.Error);
             return;
         }
 
-        Snackbar.Add("Enregistre", Severity.Success);
+        if (editingId is null)
+        {
+            var response = await ApiClient.PostAsync(HttpFactory, "api/items", new CreateItemDto(
+                trimmedTitle,
+                string.IsNullOrWhiteSpace(creator) ? null : creator.Trim(),
+                string.IsNullOrWhiteSpace(publisher) ? null : publisher.Trim(),
+                year,
+                string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
+                subcategoryId,
+                string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl.Trim()
+            ));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Erreur de création", Severity.Error);
+                return;
+            }
+        }
+        else
+        {
+            var response = await ApiClient.PutAsync(HttpFactory, $"api/items/{editingId}", new UpdateItemDto(
+                trimmedTitle,
+                string.IsNullOrWhiteSpace(creator) ? null : creator.Trim(),
+                string.IsNullOrWhiteSpace(publisher) ? null : publisher.Trim(),
+                year,
+                string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
+                subcategoryId,
+                string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl.Trim()
+            ));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Erreur de mise à jour", Severity.Error);
+                return;
+            }
+        }
+
+        dialogVisible = false;
         await LoadAsync();
+        Snackbar.Add("Enregistré", Severity.Success);
     }
 
     private async Task Delete(ItemDto dto)
@@ -127,34 +231,12 @@
         var response = await ApiClient.DeleteAsync(HttpFactory, $"api/items/{dto.ItemId}");
         if (!response.IsSuccessStatusCode)
         {
-            Snackbar.Add("Suppression echouee", Severity.Error);
+            Snackbar.Add("Suppression échouée", Severity.Error);
             return;
         }
 
         await LoadAsync();
-        Snackbar.Add("Supprime", Severity.Success);
-    }
-
-    private async Task<ItemDialogResult?> ShowDialogAsync(ItemDto? item, string title)
-    {
-        var parameters = new DialogParameters
-        {
-            { nameof(ItemDialog.Item), item },
-            { nameof(ItemDialog.Categories), categories },
-            { nameof(ItemDialog.Subcategories), subcategories }
-        };
-
-        var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true };
-        var dialogReference = await DialogService.ShowAsync<ItemDialog>(title, parameters, options);
-
-        var dialogResult = await dialogReference.Result;
-
-        if (dialogResult is not { Canceled: false, Data: ItemDialogResult data })
-        {
-            return null;
-        }
-
-        return data;
+        Snackbar.Add("Supprimé", Severity.Success);
     }
 
     private void SetFilter(ItemFilter filter)
