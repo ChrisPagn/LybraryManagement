@@ -24,19 +24,19 @@
         <HeaderContent>
             <MudTh>ID</MudTh>
             <MudTh>Titre</MudTh>
+            <MudTh>Type</MudTh>
             <MudTh>Auteur/Createur</MudTh>
             <MudTh>Editeur</MudTh>
             <MudTh>Annee</MudTh>
-            <MudTh>SC Id</MudTh>
             <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="ID">@context.ItemId</MudTd>
             <MudTd DataLabel="Titre">@context.Title</MudTd>
+            <MudTd DataLabel="Type">@GetItemType(context.ItemId)</MudTd>
             <MudTd DataLabel="Createur">@context.Creator</MudTd>
             <MudTd DataLabel="Editeur">@context.Publisher</MudTd>
             <MudTd DataLabel="Annee">@context.Year</MudTd>
-            <MudTd DataLabel="SC Id">@context.SubcategoryId</MudTd>
             <MudTd>
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="async () => await Delete(context)" />
@@ -50,25 +50,59 @@
     <MudPaper Class="pa-4 mt-4">
         <MudText Typo="Typo.h6">@dialogTitle</MudText>
         <MudForm @ref="form">
+            <MudSelect T="string" Label="Type d'item" @bind-Value="itemType" Required="true" Disabled="@(editingId.HasValue)">
+                <MudSelectItem Value="@("Book")">Livre</MudSelectItem>
+                <MudSelectItem Value="@("Game")">Jeu</MudSelectItem>
+                <MudSelectItem Value="@("Movie")">Film</MudSelectItem>
+            </MudSelect>
+
             <MudTextField @bind-Value="title" Label="Titre" Required="true" />
             <MudTextField @bind-Value="creator" Label="Createur" />
             <MudTextField @bind-Value="publisher" Label="Editeur" />
             <MudNumericField T="int?" @bind-Value="year" Label="Annee" />
             <MudTextField @bind-Value="description" Label="Description" Lines="3" />
+
             <MudSelect T="int?" Label="Categorie" @bind-Value="selectedCategoryId" Clearable="true" Placeholder="Toutes categories">
                 @foreach (var category in categories)
                 {
                     <MudSelectItem Value="@((int?)category.CategoryId)">@category.Name</MudSelectItem>
                 }
             </MudSelect>
+
             <MudSelect T="int?" Label="Sous-categorie" @bind-Value="subcategoryId" Clearable="true" Placeholder="Sans sous-categorie">
                 @foreach (var subcategory in FilteredSubcategories)
                 {
                     <MudSelectItem Value="@((int?)subcategory.SubcategoryId)">@subcategory.Name</MudSelectItem>
                 }
             </MudSelect>
+
             <MudTextField @bind-Value="imageUrl" Label="Image URL" />
+
+            <MudDivider Class="my-4" />
+            <MudText Typo="Typo.h6">Informations spécifiques</MudText>
+
+            @if (itemType == "Book")
+            {
+                <MudSelect T="int?" Label="Genre" @bind-Value="genreId" Clearable="true">
+                    @foreach (var genre in genres)
+                    {
+                        <MudSelectItem Value="@((int?)genre.GenreId)">@genre.Name</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudTextField @bind-Value="isbn" Label="ISBN" />
+            }
+            else if (itemType == "Game")
+            {
+                <MudTextField @bind-Value="platform" Label="Plateforme" />
+                <MudTextField @bind-Value="ageRange" Label="Tranche d'âge" />
+            }
+            else if (itemType == "Movie")
+            {
+                <MudTextField @bind-Value="durationText" Label="Durée (hh:mm:ss)" />
+                <MudTextField @bind-Value="rating" Label="Classification" />
+            }
         </MudForm>
+
         <MudStack Row Spacing="2" Class="mt-2">
             <MudButton OnClick="Save" Color="Color.Primary">Enregistrer</MudButton>
             <MudButton OnClick="() => dialogVisible = false">Annuler</MudButton>
@@ -77,13 +111,7 @@
 }
 
 @code {
-    private enum ItemFilter
-    {
-        All,
-        Books,
-        Games,
-        Movies
-    }
+    private enum ItemFilter { All, Books, Games, Movies }
 
     private List<ItemDto> items = new();
     private HashSet<int> bookItemIds = new();
@@ -91,11 +119,14 @@
     private HashSet<int> movieItemIds = new();
     private List<CategoryDto> categories = new();
     private List<SubcategoryDto> subcategories = new();
+    private List<GenreDto> genres = new();
     private ItemFilter currentFilter = ItemFilter.All;
 
     private bool dialogVisible;
     private string dialogTitle = string.Empty;
     private MudForm? form;
+
+    // Champs Item
     private string title = string.Empty;
     private string? creator;
     private string? publisher;
@@ -105,6 +136,21 @@
     private string? imageUrl;
     private int? selectedCategoryId;
     private int? editingId;
+
+    // Type d'item
+    private string itemType = "Book";
+
+    // Champs spécifiques Book
+    private int? genreId;
+    private string? isbn;
+
+    // Champs spécifiques Game
+    private string? platform;
+    private string? ageRange;
+
+    // Champs spécifiques Movie
+    private string? durationText;
+    private string? rating;
 
     private IEnumerable<ItemDto> FilteredItems => currentFilter switch
     {
@@ -118,6 +164,14 @@
         ? subcategories.Where(s => s.CategoryId == selectedCategoryId)
         : subcategories;
 
+    private string GetItemType(int itemId)
+    {
+        if (bookItemIds.Contains(itemId)) return "Livre";
+        if (gameItemIds.Contains(itemId)) return "Jeu";
+        if (movieItemIds.Contains(itemId)) return "Film";
+        return "Non défini";
+    }
+
     protected override async Task OnInitializedAsync() => await LoadAsync();
 
     private async Task LoadAsync()
@@ -128,6 +182,7 @@
         var movies = await ApiClient.GetAsync<List<MovieDto>>(HttpFactory, "api/movies");
         var categoryList = await ApiClient.GetAsync<List<CategoryDto>>(HttpFactory, "api/categories");
         var subcategoryList = await ApiClient.GetAsync<List<SubcategoryDto>>(HttpFactory, "api/subcategories");
+        var genreList = await ApiClient.GetAsync<List<GenreDto>>(HttpFactory, "api/genres");
 
         items = allItems ?? new List<ItemDto>();
         bookItemIds = books?.Select(b => b.ItemId).ToHashSet() ?? new HashSet<int>();
@@ -135,12 +190,14 @@
         movieItemIds = movies?.Select(m => m.ItemId).ToHashSet() ?? new HashSet<int>();
         categories = categoryList ?? new List<CategoryDto>();
         subcategories = subcategoryList ?? new List<SubcategoryDto>();
+        genres = genreList ?? new List<GenreDto>();
     }
 
     private void OpenCreate()
     {
         dialogTitle = "Nouvel item";
         editingId = null;
+        itemType = "Book";
         title = string.Empty;
         creator = null;
         publisher = null;
@@ -149,6 +206,15 @@
         subcategoryId = null;
         imageUrl = null;
         selectedCategoryId = null;
+
+        // Réinitialiser les champs spécifiques
+        genreId = null;
+        isbn = null;
+        platform = null;
+        ageRange = null;
+        durationText = null;
+        rating = null;
+
         dialogVisible = true;
     }
 
@@ -169,7 +235,57 @@
         else
             selectedCategoryId = null;
 
+        // Déterminer le type et charger les données spécifiques
+        if (bookItemIds.Contains(dto.ItemId))
+        {
+            itemType = "Book";
+            LoadBookData(dto.ItemId);
+        }
+        else if (gameItemIds.Contains(dto.ItemId))
+        {
+            itemType = "Game";
+            LoadGameData(dto.ItemId);
+        }
+        else if (movieItemIds.Contains(dto.ItemId))
+        {
+            itemType = "Movie";
+            LoadMovieData(dto.ItemId);
+        }
+
         dialogVisible = true;
+    }
+
+    private async void LoadBookData(int itemId)
+    {
+        var books = await ApiClient.GetAsync<List<BookDto>>(HttpFactory, "api/books");
+        var book = books?.FirstOrDefault(b => b.ItemId == itemId);
+        if (book != null)
+        {
+            genreId = book.GenreId;
+            isbn = book.Isbn;
+        }
+    }
+
+    private async void LoadGameData(int itemId)
+    {
+        var games = await ApiClient.GetAsync<List<GameDto>>(HttpFactory, "api/games");
+        var game = games?.FirstOrDefault(g => g.ItemId == itemId);
+        if (game != null)
+        {
+            platform = game.Platform;
+            ageRange = game.AgeRange;
+        }
+    }
+
+    private async void LoadMovieData(int itemId)
+    {
+        var movies = await ApiClient.GetAsync<List<MovieDto>>(HttpFactory, "api/movies");
+        var movie = movies?.FirstOrDefault(m => m.ItemId == itemId);
+        if (movie != null)
+        {
+            durationText = movie.Duration?.ToString();
+            rating = movie.Rating;
+        }
     }
 
     private async Task Save()
@@ -184,9 +300,17 @@
             return;
         }
 
+        if (string.IsNullOrWhiteSpace(itemType))
+        {
+            Snackbar.Add("Le type d'item est requis", Severity.Error);
+            return;
+        }
+
+        // Créer ou mettre à jour l'Item
+        int itemId;
         if (editingId is null)
         {
-            var response = await ApiClient.PostAsync(HttpFactory, "api/items", new CreateItemDto(
+            var itemResponse = await ApiClient.PostAsync(HttpFactory, "api/items", new CreateItemDto(
                 trimmedTitle,
                 string.IsNullOrWhiteSpace(creator) ? null : creator.Trim(),
                 string.IsNullOrWhiteSpace(publisher) ? null : publisher.Trim(),
@@ -196,15 +320,19 @@
                 string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl.Trim()
             ));
 
-            if (!response.IsSuccessStatusCode)
+            if (!itemResponse.IsSuccessStatusCode)
             {
-                Snackbar.Add("Erreur de création", Severity.Error);
+                Snackbar.Add("Erreur lors de la création de l'item", Severity.Error);
                 return;
             }
+
+            var createdItem = await itemResponse.Content.ReadFromJsonAsync<ItemDto>();
+            itemId = createdItem!.ItemId;
         }
         else
         {
-            var response = await ApiClient.PutAsync(HttpFactory, $"api/items/{editingId}", new UpdateItemDto(
+            itemId = editingId.Value;
+            var itemResponse = await ApiClient.PutAsync(HttpFactory, $"api/items/{itemId}", new UpdateItemDto(
                 trimmedTitle,
                 string.IsNullOrWhiteSpace(creator) ? null : creator.Trim(),
                 string.IsNullOrWhiteSpace(publisher) ? null : publisher.Trim(),
@@ -214,20 +342,130 @@
                 string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl.Trim()
             ));
 
-            if (!response.IsSuccessStatusCode)
+            if (!itemResponse.IsSuccessStatusCode)
             {
-                Snackbar.Add("Erreur de mise à jour", Severity.Error);
+                Snackbar.Add("Erreur lors de la mise à jour de l'item", Severity.Error);
                 return;
             }
+        }
+
+        // Créer ou mettre à jour les données spécifiques
+        bool specificSuccess = false;
+        if (itemType == "Book")
+        {
+            specificSuccess = await SaveBookData(itemId);
+        }
+        else if (itemType == "Game")
+        {
+            specificSuccess = await SaveGameData(itemId);
+        }
+        else if (itemType == "Movie")
+        {
+            specificSuccess = await SaveMovieData(itemId);
+        }
+
+        if (!specificSuccess)
+        {
+            return;
         }
 
         dialogVisible = false;
         await LoadAsync();
-        Snackbar.Add("Enregistré", Severity.Success);
+        Snackbar.Add("Enregistré avec succès", Severity.Success);
+    }
+
+    private async Task<bool> SaveBookData(int itemId)
+    {
+        if (editingId is null)
+        {
+            var response = await ApiClient.PostAsync(HttpFactory, "api/books", new CreateBookDto(itemId, genreId, isbn));
+            if (!response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Erreur lors de la création du livre", Severity.Error);
+                return false;
+            }
+        }
+        else
+        {
+            var books = await ApiClient.GetAsync<List<BookDto>>(HttpFactory, "api/books");
+            var book = books?.FirstOrDefault(b => b.ItemId == itemId);
+            if (book != null)
+            {
+                var response = await ApiClient.PutAsync(HttpFactory, $"api/books/{book.BookId}", new UpdateBookDto(itemId, genreId, isbn));
+                if (!response.IsSuccessStatusCode)
+                {
+                    Snackbar.Add("Erreur lors de la mise à jour du livre", Severity.Error);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private async Task<bool> SaveGameData(int itemId)
+    {
+        if (editingId is null)
+        {
+            var response = await ApiClient.PostAsync(HttpFactory, "api/games", new CreateGameDto(itemId, platform, ageRange));
+            if (!response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Erreur lors de la création du jeu", Severity.Error);
+                return false;
+            }
+        }
+        else
+        {
+            var games = await ApiClient.GetAsync<List<GameDto>>(HttpFactory, "api/games");
+            var game = games?.FirstOrDefault(g => g.ItemId == itemId);
+            if (game != null)
+            {
+                var response = await ApiClient.PutAsync(HttpFactory, $"api/games/{game.GameId}", new UpdateGameDto(itemId, platform, ageRange));
+                if (!response.IsSuccessStatusCode)
+                {
+                    Snackbar.Add("Erreur lors de la mise à jour du jeu", Severity.Error);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private async Task<bool> SaveMovieData(int itemId)
+    {
+        var duration = !string.IsNullOrWhiteSpace(durationText) && TimeSpan.TryParse(durationText, out var ts)
+            ? ts
+            : null as TimeSpan?;
+
+        if (editingId is null)
+        {
+            var response = await ApiClient.PostAsync(HttpFactory, "api/movies", new CreateMovieDto(itemId, duration, rating));
+            if (!response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Erreur lors de la création du film", Severity.Error);
+                return false;
+            }
+        }
+        else
+        {
+            var movies = await ApiClient.GetAsync<List<MovieDto>>(HttpFactory, "api/movies");
+            var movie = movies?.FirstOrDefault(m => m.ItemId == itemId);
+            if (movie != null)
+            {
+                var response = await ApiClient.PutAsync(HttpFactory, $"api/movies/{movie.MovieId}", new UpdateMovieDto(itemId, duration, rating));
+                if (!response.IsSuccessStatusCode)
+                {
+                    Snackbar.Add("Erreur lors de la mise à jour du film", Severity.Error);
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private async Task Delete(ItemDto dto)
     {
+        // Supprimer d'abord l'entrée spécifique (Book/Game/Movie)
+        // La suppression en cascade devrait gérer l'item
         var response = await ApiClient.DeleteAsync(HttpFactory, $"api/items/{dto.ItemId}");
         if (!response.IsSuccessStatusCode)
         {
@@ -236,7 +474,7 @@
         }
 
         await LoadAsync();
-        Snackbar.Add("Supprimé", Severity.Success);
+        Snackbar.Add("Supprimé avec succès", Severity.Success);
     }
 
     private void SetFilter(ItemFilter filter)
