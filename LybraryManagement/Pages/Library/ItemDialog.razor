@@ -27,8 +27,8 @@
         </MudForm>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Submit" Color="Color.Primary">Enregistrer</MudButton>
-        <MudButton ButtonType="ButtonType.Button" OnClick="Cancel">Annuler</MudButton>
+        <MudButton OnClick="Cancel" Color="Color.Default">Annuler</MudButton>
+        <MudButton OnClick="Submit" Color="Color.Primary" Variant="Variant.Filled">Enregistrer</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -111,7 +111,10 @@
         MudDialog?.Close(DialogResult.Ok(result));
     }
 
-    private void Cancel() => MudDialog?.Close(DialogResult.Cancel());
+    private void Cancel()
+    {
+        MudDialog?.Cancel();
+    }
 
     private class ItemDialogModel
     {
@@ -125,4 +128,3 @@
         public string? ImageUrl { get; set; }
     }
 }
-
