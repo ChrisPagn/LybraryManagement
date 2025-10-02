@@ -1,18 +1,31 @@
 @using MudBlazor
+@inject NavigationManager Navigation
 
 <MudNavMenu>
-    <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Accueil</MudNavLink>
+    <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home" OnClick="@NavigateAndClose">
+        Accueil
+    </MudNavLink>
     <MudDivider Class="my-2" />
 
     <MudText Typo="Typo.subtitle2" Class="ms-4 mt-2">Bibliothèque</MudText>
-    <MudNavLink Href="/items" Icon="@Icons.Material.Filled.Inventory">Items</MudNavLink>
-    <MudNavLink Href="/books" Icon="@Icons.Material.Filled.MenuBook">Livres</MudNavLink>
-    <MudNavLink Href="/games" Icon="@Icons.Material.Filled.SportsEsports">Jeux</MudNavLink>
-    <MudNavLink Href="/movies" Icon="@Icons.Material.Filled.Movie">Films</MudNavLink>
-    
+    <MudNavLink Href="/items" Icon="@Icons.Material.Filled.Inventory" OnClick="@NavigateAndClose">Items</MudNavLink>
+    <MudNavLink Href="/books" Icon="@Icons.Material.Filled.MenuBook" OnClick="@NavigateAndClose">Livres</MudNavLink>
+    <MudNavLink Href="/games" Icon="@Icons.Material.Filled.SportsEsports" OnClick="@NavigateAndClose">Jeux</MudNavLink>
+    <MudNavLink Href="/movies" Icon="@Icons.Material.Filled.Movie" OnClick="@NavigateAndClose">Films</MudNavLink>
+
     <MudText Typo="Typo.subtitle2" Class="ms-4 mt-2">Gestion Admin</MudText>
-    <MudNavLink Href="/categories" Icon="@Icons.Material.Filled.Category">Catégories</MudNavLink>
-    <MudNavLink Href="/subcategories" Icon="@Icons.Material.Filled.Label">Sous-catégories</MudNavLink>
-    <MudNavLink Href="/genres" Icon="@Icons.Material.Filled.Style">Genres</MudNavLink>
+    <MudNavLink Href="/categories" Icon="@Icons.Material.Filled.Category" OnClick="@NavigateAndClose">Catégories</MudNavLink>
+    <MudNavLink Href="/subcategories" Icon="@Icons.Material.Filled.Label" OnClick="@NavigateAndClose">Sous-catégories</MudNavLink>
+    <MudNavLink Href="/genres" Icon="@Icons.Material.Filled.Style" OnClick="@NavigateAndClose">Genres</MudNavLink>
 </MudNavMenu>
 
+@code {
+    [Parameter] public EventCallback OnNavigation { get; set; }
+
+    private async Task NavigateAndClose()
+    {
+        // Notifie le parent (MainLayout) pour fermer le drawer après navigation
+        if (OnNavigation.HasDelegate)
+            await OnNavigation.InvokeAsync();
+    }
+}

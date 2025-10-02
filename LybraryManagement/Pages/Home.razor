@@ -1,81 +1,253 @@
 ﻿@page "/"
+@using MudBlazor
 
 <PageTitle>Accueil</PageTitle>
 
-<div class="home-container">
-    <div class="home-content">
-        <MudPaper Class="welcome-card pa-6" Elevation="3">
-            <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">
-                Bienvenue dans votre bibliothèque
-            </MudText>
-            <MudText Typo="Typo.body1" Align="Align.Center" Class="mt-4">
-                Gérez vos livres, films et jeux en toute simplicité
-            </MudText>
-            <MudDivider Class="my-4" />
-            <MudStack Row Spacing="4" Justify="Justify.Center" Class="mt-6">
-                <MudButton Href="/books" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.MenuBook" Size="Size.Large">
-                    Livres
-                </MudButton>
-                <MudButton Href="/movies" Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Movie" Size="Size.Large">
-                    Films
-                </MudButton>
-                <MudButton Href="/games" Variant="Variant.Filled" Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.SportsEsports" Size="Size.Large">
-                    Jeux
-                </MudButton>
-                <MudButton Href="/items" Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Filled.AllInbox" Size="Size.Large">
-                    Tout
-                </MudButton>
-            </MudStack>
-        </MudPaper>
-    </div>
+<div class="content-wrapper animate-in">
+    <MudContainer MaxWidth="MaxWidth.Large" Class="py-8">
+        <MudGrid Justify="Justify.Center" AlignItems="AlignItems.Center" Style="min-height: calc(100vh - 200px);">
+            <MudItem xs="12" md="10" lg="8">
+                <MudPaper Class="glass-paper pa-8" Elevation="0">
+                    <MudStack AlignItems="AlignItems.Center" Spacing="4">
+                        <MudIcon Icon="@Icons.Material.Filled.AutoStories"
+                                 Style="font-size: 5rem; color: white; filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));" />
+
+                        <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true" Class="hero-title">
+                            Bienvenue dans votre bibliothèque
+                        </MudText>
+
+                        <MudText Typo="Typo.h6" Align="Align.Center" Class="hero-subtitle">
+                            Gérez vos livres, films et jeux en toute simplicité
+                        </MudText>
+
+                        <MudDivider Class="my-4" Style="width: 60%; background-color: rgba(255, 255, 255, 0.3);" />
+
+                        <MudGrid Spacing="3" Justify="Justify.Center" Class="mt-4">
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudCard Class="feature-card" Elevation="0">
+                                    <MudCardContent Class="text-center">
+                                        <MudIcon Icon="@Icons.Material.Filled.MenuBook" Size="Size.Large" Class="feature-icon" />
+                                        <MudText Typo="Typo.h6" Class="mt-2">Livres</MudText>
+                                        <MudText Typo="Typo.body2" Class="mt-1 mb-3">Gérez vos livres</MudText>
+                                        <MudButton Href="/books"
+                                                   Variant="Variant.Filled"
+                                                   Color="Color.Primary"
+                                                   FullWidth="true"
+                                                   Class="glass-button">
+                                            Explorer
+                                        </MudButton>
+                                    </MudCardContent>
+                                </MudCard>
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudCard Class="feature-card" Elevation="0">
+                                    <MudCardContent Class="text-center">
+                                        <MudIcon Icon="@Icons.Material.Filled.Movie" Size="Size.Large" Class="feature-icon" />
+                                        <MudText Typo="Typo.h6" Class="mt-2">Films</MudText>
+                                        <MudText Typo="Typo.body2" Class="mt-1 mb-3">Organisez vos films</MudText>
+                                        <MudButton Href="/movies"
+                                                   Variant="Variant.Filled"
+                                                   Color="Color.Secondary"
+                                                   FullWidth="true"
+                                                   Class="glass-button">
+                                            Explorer
+                                        </MudButton>
+                                    </MudCardContent>
+                                </MudCard>
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudCard Class="feature-card" Elevation="0">
+                                    <MudCardContent Class="text-center">
+                                        <MudIcon Icon="@Icons.Material.Filled.SportsEsports" Size="Size.Large" Class="feature-icon" />
+                                        <MudText Typo="Typo.h6" Class="mt-2">Jeux</MudText>
+                                        <MudText Typo="Typo.body2" Class="mt-1 mb-3">Cataloguez vos jeux</MudText>
+                                        <MudButton Href="/games"
+                                                   Variant="Variant.Filled"
+                                                   Color="Color.Tertiary"
+                                                   FullWidth="true"
+                                                   Class="glass-button">
+                                            Explorer
+                                        </MudButton>
+                                    </MudCardContent>
+                                </MudCard>
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudCard Class="feature-card" Elevation="0">
+                                    <MudCardContent Class="text-center">
+                                        <MudIcon Icon="@Icons.Material.Filled.AllInbox" Size="Size.Large" Class="feature-icon" />
+                                        <MudText Typo="Typo.h6" Class="mt-2">Tout voir</MudText>
+                                        <MudText Typo="Typo.body2" Class="mt-1 mb-3">Vue d'ensemble</MudText>
+                                        <MudButton Href="/items"
+                                                   Variant="Variant.Filled"
+                                                   Color="Color.Warning"
+                                                   FullWidth="true"
+                                                   Class="glass-button">
+                                            Explorer
+                                        </MudButton>
+                                    </MudCardContent>
+                                </MudCard>
+                            </MudItem>
+                        </MudGrid>
+
+                       <MudDivider Class="my-4" Style="width: 60%; background-color: rgba(255, 255, 255, 0.3);" />
+
+                        @*   <!-- Statistiques rapides -->
+                        <MudGrid Spacing="4" Justify="Justify.Center" Class="mt-4">
+                            <MudItem xs="4">
+                                <MudStack AlignItems="AlignItems.Center">
+                                    <MudText Typo="Typo.h4" Class="stat-number">0</MudText>
+                                    <MudText Typo="Typo.body2" Class="stat-label">Articles</MudText>
+                                </MudStack>
+                            </MudItem>
+                            <MudItem xs="4">
+                                <MudStack AlignItems="AlignItems.Center">
+                                    <MudText Typo="Typo.h4" Class="stat-number">0</MudText>
+                                    <MudText Typo="Typo.body2" Class="stat-label">Catégories</MudText>
+                                </MudStack>
+                            </MudItem>
+                            <MudItem xs="4">
+                                <MudStack AlignItems="AlignItems.Center">
+                                    <MudText Typo="Typo.h4" Class="stat-number">0</MudText>
+                                    <MudText Typo="Typo.body2" Class="stat-label">Genres</MudText>
+                                </MudStack>
+                            </MudItem>
+                        </MudGrid> *@
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
 </div>
 
 <style>
-    .home-container {
-        position: relative;
-        min-height: calc(100vh - 64px);
-        background-image: url('/images/library-bg.jpg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        
-    }
-
-        .home-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-        }
-
-    .home-content {
+    /* Utilise le background global du MainLayout */
+    .content-wrapper {
         position: relative;
         z-index: 1;
-        width: 100%;
-        max-width: 800px;
-        padding: 2rem;
     }
 
-    .welcome-card {
-        background: rgba(255, 255, 255, 0.02) !important;
-        backdrop-filter: blur(20px) saturate(180%);
-        -webkit-backdrop-filter: blur(10px) saturate(150%);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    /* Titre principal */
+    .hero-title {
+        color: white !important;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+        font-weight: 700;
+        letter-spacing: 0.5px;
     }
 
-        .welcome-card .mud-typography {
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    .hero-subtitle {
+        color: rgba(255, 255, 255, 0.95) !important;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+        font-weight: 300;
+    }
+
+    /* Cartes de fonctionnalités avec effet verre */
+    .feature-card {
+        background: rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(10px) saturate(150%) !important;
+        -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3) !important;
+        border-radius: 12px !important;
+        transition: all 0.3s ease;
+    }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px 0 rgba(0, 0, 0, 0.5) !important;
+            background: rgba(255, 255, 255, 0.12) !important;
         }
 
-        .welcome-card .mud-divider {
-            background-color: rgba(255, 255, 255, 0.3);
+        .feature-card .mud-typography {
+            color: white !important;
         }
+
+    .feature-icon {
+        color: white !important;
+        font-size: 3rem !important;
+        filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+    }
+
+    /* Boutons avec style cohérent */
+    .glass-button {
+        transition: all 0.3s ease;
+        text-transform: none;
+        letter-spacing: 0.5px;
+    }
+
+        .glass-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.4) !important;
+        }
+
+    /* Statistiques */
+    .stat-number {
+        color: white !important;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+    }
+
+    .stat-label {
+        color: rgba(255, 255, 255, 0.8) !important;
+        text-transform: uppercase;
+        font-size: 0.75rem !important;
+        letter-spacing: 1px;
+    }
+
+    /* Animation d'apparition */
+    @@keyframes fadeInUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .animate-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    /* Responsive */
+    @@media (max-width: 960px) {
+        .hero-title
+
+    {
+        font-size: 2rem !important;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem !important;
+    }
+
+    .feature-icon {
+        font-size: 2.5rem !important;
+    }
+
+    }
+
+    @@media (max-width: 600px) {
+        .hero-title
+
+    {
+        font-size: 1.5rem !important;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem !important;
+    }
+
+    .feature-card {
+        margin-bottom: 1rem;
+    }
+
+    }
 </style>

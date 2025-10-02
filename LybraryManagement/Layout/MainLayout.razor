@@ -1,110 +1,244 @@
-@inherits LayoutComponentBase
 @using MudBlazor
-@inject NavigationManager NavigationManager
-
-<MudThemeProvider />
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
+@inherits LayoutComponentBase
+@inject NavigationManager Navigation
 
 <MudLayout>
-    <MudAppBar Color="Color.Primary" Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
-        <MudText Typo="Typo.h6">Gestion de ma bibliothèque</MudText>
+    <!-- Background global avec image de bibliothèque -->
+    <div class="page-background"></div>
+
+    <MudAppBar Elevation="0" Class="glass-appbar" Fixed="true">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@DrawerToggle" />
         <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.Info" Color="Color.Inherit" Href="https://learn.microsoft.com/aspnet/core/" Target="_blank" />
+        <MudText Typo="Typo.h5" Class="appbar-title">
+            <MudIcon Icon="@Icons.Material.Filled.AutoStories" Size="Size.Medium" Class="me-2" />
+            Library Management
+        </MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" />
+        <MudIconButton Icon="@Icons.Material.Filled.Person" Color="Color.Inherit" />
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen"
+               Elevation="0"
+               Class="glass-drawer"
                Variant="@DrawerVariant.Responsive"
-               Elevation="1"
-               Class="pa-2"
-               @onmouseenter="OnDrawerMouseEnter"
+               ClipMode="DrawerClipMode.Always"
+               Breakpoint="Breakpoint.Lg"
+               PreserveOpenState="true"
                @onmouseleave="OnDrawerMouseLeave">
-        <NavMenu />
+        <MudDrawerHeader Class="drawer-header">
+            <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.LocalLibrary" Size="Size.Large" />
+                <MudText Typo="Typo.h6">Bibliothèque</MudText>
+            </MudStack>
+        </MudDrawerHeader>
+
+        <!-- Contenu du drawer -->
+        <NavMenu OnNavigation="@HandleNavigation" />
     </MudDrawer>
 
-    <MudMainContent @onclick="CloseDrawerIfOpen">
-        <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
+    <MudMainContent>
+        <div class="main-content-wrapper">
             @Body
-        </MudContainer>
+        </div>
     </MudMainContent>
 </MudLayout>
 
 @code {
-    private bool _drawerOpen = false;
-    private bool _isMouseOverDrawer = false;
-    private System.Timers.Timer? _closeTimer;
+    private bool _drawerOpen = true;
+    private MudTheme _theme = new();
+
+    // Petit délai pour éviter la fermeture "trop nerveuse"
+    private System.Threading.CancellationTokenSource? _leaveCts;
 
     protected override void OnInitialized()
     {
-        NavigationManager.LocationChanged += OnLocationChanged;
+        // Par défaut fermé ; s'ouvrira via le bouton
+        _drawerOpen = false;
     }
 
-    private void ToggleDrawer()
-    {
-        _drawerOpen = !_drawerOpen;
-    }
+    private void DrawerToggle() => _drawerOpen = !_drawerOpen;
 
-    private void OnDrawerMouseEnter()
+    private void HandleNavigation()
     {
-        _isMouseOverDrawer = true;
-        _closeTimer?.Stop();
-    }
-
-    private void OnDrawerMouseLeave()
-    {
-        _isMouseOverDrawer = false;
-        StartCloseTimer();
-    }
-
-    private void StartCloseTimer()
-    {
-        _closeTimer?.Stop();
-        _closeTimer = new System.Timers.Timer(800); // Délai de 800ms avant fermeture
-        _closeTimer.Elapsed += (sender, e) =>
+        // Ferme après navigation (utile sur mobile)
+        if (_drawerOpen)
         {
-            InvokeAsync(() =>
+            _drawerOpen = false;
+            StateHasChanged();
+        }
+    }
+
+    private async void OnDrawerMouseLeave(Microsoft.AspNetCore.Components.Web.MouseEventArgs _)
+    {
+        // Debounce: si la souris revient vite, on annule
+        _leaveCts?.Cancel();
+        _leaveCts = new System.Threading.CancellationTokenSource();
+        try
+        {
+            await Task.Delay(150, _leaveCts.Token);
+            if (_drawerOpen)
             {
-                if (!_isMouseOverDrawer && _drawerOpen)
-                {
-                    _drawerOpen = false;
-                    StateHasChanged();
-                }
-            });
-            _closeTimer?.Stop();
-        };
-        _closeTimer.Start();
-    }
-
-    private void CloseDrawerIfOpen()
-    {
-        if (_drawerOpen && !_isMouseOverDrawer)
-        {
-            _drawerOpen = false;
+                _drawerOpen = false;
+                StateHasChanged();
+            }
         }
-    }
-
-    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
-    {
-        // Ferme le drawer sur mobile après navigation
-        if (IsSmallScreen())
+        catch (TaskCanceledException)
         {
-            _drawerOpen = false;
-            InvokeAsync(StateHasChanged);
+            // Ignorer si annulé
         }
-    }
-
-    private bool IsSmallScreen()
-    {
-        // Cette méthode est une approximation. Pour une détection précise, utilisez JS Interop
-        return true; // À adapter selon vos besoins
-    }
-
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= OnLocationChanged;
-        _closeTimer?.Stop();
-        _closeTimer?.Dispose();
     }
 }
+
+
+<style>
+    /* Background global avec image de bibliothèque */
+    .page-background {
+        position: fixed;
+        inset: 0;
+        background-image: url('/images/library-bg.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        z-index: 0;
+    }
+
+        .page-background::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.5) 100%);
+            backdrop-filter: blur(2px);
+        }
+
+    /* AppBar verre dépoli */
+    .glass-appbar {
+        background: rgba(255, 255, 255, 0.1) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2) !important;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+        .glass-appbar .mud-icon-button,
+        .glass-appbar .mud-typography {
+            color: white !important;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+    .appbar-title {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* Drawer verre dépoli */
+    .glass-drawer {
+        background: rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(15px) saturate(150%) !important;
+        -webkit-backdrop-filter: blur(15px) saturate(150%) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .drawer-header {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+        padding: 1.5rem !important;
+    }
+
+        .drawer-header .mud-icon,
+        .drawer-header .mud-typography {
+            color: white !important;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+    /* Navigation Menu styling */
+    .glass-drawer .mud-nav-menu {
+        background: transparent !important;
+    }
+
+    .glass-drawer .mud-nav-link {
+        color: rgba(255, 255, 255, 0.9) !important;
+        margin: 0.25rem 0.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .glass-drawer .mud-nav-link:hover {
+            background: rgba(255, 255, 255, 0.15) !important;
+            color: white !important;
+        }
+
+        .glass-drawer .mud-nav-link.active {
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: white !important;
+            font-weight: 600;
+        }
+
+    .glass-drawer .mud-divider {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        margin: 0.5rem 1rem !important;
+    }
+
+    .glass-drawer .mud-text.mud-text-subtitle2 {
+        color: rgba(255, 255, 255, 0.7) !important;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem !important;
+        letter-spacing: 1px;
+    }
+
+    /* Main content wrapper */
+    .main-content-wrapper {
+        position: relative;
+        z-index: 1;
+        min-height: calc(100vh - 64px);
+    }
+
+    /* Responsive */
+    @@media (max-width: 960px) {
+        .glass-drawer
+
+    {
+        background: rgba(0, 0, 0, 0.9) !important;
+    }
+
+    }
+
+    /* Animation */
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+
+    }
+
+    /* Scrollbar personnalisée pour le drawer */
+    .glass-drawer ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .glass-drawer ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+    }
+
+    .glass-drawer ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+    }
+
+        .glass-drawer ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+</style>
