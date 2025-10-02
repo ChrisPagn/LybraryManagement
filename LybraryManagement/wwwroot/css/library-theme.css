@@ -1,0 +1,201 @@
+﻿/* ===================================
+   STYLES PARTAGÉS - THÈME BIBLIOTHÈQUE
+   =================================== */
+
+/* Background global avec image de bibliothèque */
+.page-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/images/library-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    z-index: -1;
+}
+
+    .page-background::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.5) 100%);
+        backdrop-filter: blur(2px);
+    }
+
+/* Container principal pour le contenu */
+.content-wrapper {
+    position: relative;
+    min-height: calc(100vh - 64px);
+    padding: 2rem;
+    z-index: 1;
+}
+
+/* Style pour les MudPaper avec effet verre dépoli */
+.glass-paper {
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4) !important;
+    border-radius: 16px !important;
+}
+
+    /* Titres sur fond sombre */
+    .glass-paper .mud-typography-h5,
+    .glass-paper .mud-typography-h6 {
+        color: white !important;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        font-weight: 600;
+    }
+
+    /* Texte dans les tableaux */
+    .glass-paper .mud-table {
+        background: transparent !important;
+    }
+
+    .glass-paper .mud-table-head {
+        background: rgba(255, 255, 255, 0.15) !important;
+    }
+
+        .glass-paper .mud-table-head .mud-table-cell {
+            color: white !important;
+            font-weight: 600 !important;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+    .glass-paper .mud-table-body .mud-table-cell {
+        color: rgba(255, 255, 255, 0.95) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .glass-paper .mud-table-row:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    /* Formulaires et inputs */
+    .glass-paper .mud-input,
+    .glass-paper .mud-input-slot,
+    .glass-paper .mud-select,
+    .glass-paper .mud-input-label {
+        color: white !important;
+    }
+
+    .glass-paper .mud-input-underline::before {
+        border-bottom-color: rgba(255, 255, 255, 0.4) !important;
+    }
+
+    .glass-paper .mud-input-underline::after {
+        border-bottom-color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    .glass-paper .mud-input-label {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    /* Boutons améliorés */
+    .glass-paper .mud-button-filled-primary {
+        background: linear-gradient(135deg, #594F8D 0%, #826CC5 100%) !important;
+        box-shadow: 0 4px 15px 0 rgba(89, 79, 141, 0.4) !important;
+        transition: all 0.3s ease;
+    }
+
+        .glass-paper .mud-button-filled-primary:hover {
+            box-shadow: 0 6px 20px 0 rgba(89, 79, 141, 0.6) !important;
+            transform: translateY(-2px);
+        }
+
+    .glass-paper .mud-button-filled-error {
+        background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%) !important;
+        box-shadow: 0 4px 15px 0 rgba(211, 47, 47, 0.4) !important;
+    }
+
+    /* Icônes */
+    .glass-paper .mud-icon-button {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+
+        .glass-paper .mud-icon-button:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+        }
+
+    /* Divider */
+    .glass-paper .mud-divider {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+    }
+
+/* Style alternatif - Paper plus sombre pour formulaires */
+.dark-glass-paper {
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(15px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6) !important;
+    border-radius: 12px !important;
+}
+
+    .dark-glass-paper .mud-typography,
+    .dark-glass-paper .mud-input-label,
+    .dark-glass-paper .mud-input {
+        color: white !important;
+    }
+
+/* Animation d'apparition */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-in {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+    .content-wrapper {
+        padding: 1rem;
+    }
+
+    .glass-paper {
+        background: rgba(255, 255, 255, 0.15) !important;
+    }
+}
+
+/* Style pour les badges/chips */
+.glass-paper .mud-chip {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Scrollbar personnalisée */
+.glass-paper ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.glass-paper ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.glass-paper ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+
+    .glass-paper ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }

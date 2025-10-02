@@ -7,58 +7,128 @@
 
 <PageTitle>Livres</PageTitle>
 
-<MudPaper Class="pa-4">
-    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-        <MudText Typo="Typo.h5">Livres</MudText>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreate">Ajouter</MudButton>
-    </MudStack>
+<!-- Background avec image de bibliothèque -->
+<div class="page-background"></div>
 
-    <MudTable Items="books" Dense="true" Hover="true" Class="mt-4">
-        <HeaderContent>
-            <MudTh>ID</MudTh>
-            <MudTh>ItemId</MudTh>
-            <MudTh>Titre</MudTh>
-            <MudTh>Createur</MudTh>
-            <MudTh>Editeur</MudTh>
-            <MudTh>Annee</MudTh>
-            <MudTh>GenreId</MudTh>
-            <MudTh>ISBN</MudTh>
-            <MudTh></MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="ID">@context.BookId</MudTd>
-            <MudTd DataLabel="ItemId">@context.ItemId</MudTd>
-            <MudTd DataLabel="Titre">@context.Item?.Title</MudTd>
-            <MudTd DataLabel="Createur">@context.Item?.Creator</MudTd>
-            <MudTd DataLabel="Editeur">@context.Item?.Publisher</MudTd>
-            <MudTd DataLabel="Annee">@context.Item?.Year</MudTd>
-            <MudTd DataLabel="GenreId">@context.GenreId</MudTd>
-            <MudTd DataLabel="ISBN">@context.Isbn</MudTd>
-            <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(context)" />
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
-</MudPaper>
+<div class="content-wrapper animate-in">
+    <MudPaper Class="glass-paper pa-4 mb-4">
+        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.MenuBook" Size="Size.Large" Style="color: white;" />
+                <MudText Typo="Typo.h5">Livres</MudText>
+            </MudStack>
+            <MudButton Color="Color.Primary"
+                       Variant="Variant.Filled"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="OpenCreate"
+                       Size="Size.Large">
+                Ajouter un livre
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+
+    <MudPaper Class="glass-paper pa-4">
+        @if (books == null || !books.Any())
+        {
+            <MudStack AlignItems="AlignItems.Center" Spacing="4" Class="pa-8">
+                <MudIcon Icon="@Icons.Material.Filled.LibraryBooks" Size="Size.Large" Style="color: rgba(255,255,255,0.5); font-size: 5rem;" />
+                <MudText Typo="Typo.h6" Style="color: rgba(255,255,255,0.8);">Aucun livre dans votre bibliothèque</MudText>
+                <MudText Typo="Typo.body2" Style="color: rgba(255,255,255,0.6);">Commencez par ajouter votre premier livre</MudText>
+            </MudStack>
+        }
+        else
+        {
+            <MudTable Items="books" Dense="true" Hover="true" Class="mt-2">
+                <HeaderContent>
+                    <MudTh>ID</MudTh>
+                    <MudTh>Titre</MudTh>
+                    <MudTh>Créateur</MudTh>
+                    <MudTh>Éditeur</MudTh>
+                    <MudTh>Année</MudTh>
+                    <MudTh>Genre</MudTh>
+                    <MudTh>ISBN</MudTh>
+                    <MudTh Style="text-align: right;">Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="ID">@context.BookId</MudTd>
+                    <MudTd DataLabel="Titre"><strong>@context.Item?.Title</strong></MudTd>
+                    <MudTd DataLabel="Créateur">@context.Item?.Creator</MudTd>
+                    <MudTd DataLabel="Éditeur">@context.Item?.Publisher</MudTd>
+                    <MudTd DataLabel="Année">@context.Item?.Year</MudTd>
+                    <MudTd DataLabel="Genre">@context.GenreId</MudTd>
+                    <MudTd DataLabel="ISBN">@context.Isbn</MudTd>
+                    <MudTd DataLabel="Actions" Style="text-align: right;">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Info"
+                                       Size="Size.Small"
+                                       OnClick="() => OpenEdit(context)"
+                                       Title="Modifier" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="() => Delete(context)"
+                                       Title="Supprimer" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudPaper>
+</div>
 
 @if (dialogVisible)
 {
-    <MudPaper Class="pa-4 mt-4">
-        <MudText Typo="Typo.h6">@dialogTitle</MudText>
-        <MudForm @ref="form">
-            <MudNumericField T="int" @bind-Value="itemId" Label="ItemId" Required="true" />
-            <MudNumericField T="int?" @bind-Value="genreId" Label="GenreId" />
-            <MudTextField @bind-Value="isbn" Label="ISBN" />
-        </MudForm>
-        <MudStack Row Spacing="2" Class="mt-2">
-            <MudButton OnClick="Save" Color="Color.Primary">Enregistrer</MudButton>
-            <MudButton OnClick="() => dialogVisible = false">Annuler</MudButton>
-        </MudStack>
-    </MudPaper>
+    <MudOverlay Visible="true" DarkBackground="true" Absolute="false" />
+    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1400; width: 90%; max-width: 600px;">
+        <MudPaper Class="dark-glass-paper pa-6 animate-in">
+            <MudStack Spacing="3">
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <MudText Typo="Typo.h6" Style="color: white;">@dialogTitle</MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                   Color="Color.Default"
+                                   OnClick="() => dialogVisible = false"
+                                   Style="color: white;" />
+                </MudStack>
+
+                <MudDivider Style="background-color: rgba(255,255,255,0.2);" />
+
+                <MudForm @ref="form">
+                    <MudStack Spacing="3">
+                        <MudNumericField T="int"
+                                         @bind-Value="itemId"
+                                         Label="ID de l'item"
+                                         Required="true"
+                                         Variant="Variant.Outlined" />
+
+                        <MudNumericField T="int?"
+                                         @bind-Value="genreId"
+                                         Label="ID du genre"
+                                         Variant="Variant.Outlined" />
+
+                        <MudTextField @bind-Value="isbn"
+                                      Label="ISBN"
+                                      Variant="Variant.Outlined" />
+                    </MudStack>
+                </MudForm>
+
+                <MudStack Row Spacing="2" Justify="Justify.SpaceEvenly" Class="mt-2">
+                    <MudButton OnClick="() => dialogVisible = false"
+                               Variant="Variant.Text"
+                               Style="color: white;">
+                        Annuler
+                    </MudButton>
+                    <MudButton OnClick="Save"
+                               Color="Color.Primary"
+                               Variant="Variant.Filled">
+                        Enregistrer
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+    </div>
 }
 
-@code {
-
-}
+<style>
+    /* Import du style partagé dans la page */
+    @@import url('/css/library-theme.css');
+</style>
 
