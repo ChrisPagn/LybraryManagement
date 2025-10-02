@@ -1,5 +1,6 @@
 @inherits LayoutComponentBase
 @using MudBlazor
+@inject NavigationManager NavigationManager
 
 <MudThemeProvider />
 <MudPopoverProvider />
@@ -14,11 +15,16 @@
         <MudIconButton Icon="@Icons.Material.Filled.Info" Color="Color.Inherit" Href="https://learn.microsoft.com/aspnet/core/" Target="_blank" />
     </MudAppBar>
 
-    <MudDrawer @bind-Open="_drawerOpen" Variant="DrawerVariant.Responsive" Elevation="1" Class="pa-2">
+    <MudDrawer @bind-Open="_drawerOpen"
+               Variant="@DrawerVariant.Responsive"
+               Elevation="1"
+               Class="pa-2"
+               @onmouseenter="OnDrawerMouseEnter"
+               @onmouseleave="OnDrawerMouseLeave">
         <NavMenu />
     </MudDrawer>
 
-    <MudMainContent>
+    <MudMainContent @onclick="CloseDrawerIfOpen">
         <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
             @Body
         </MudContainer>
@@ -26,6 +32,79 @@
 </MudLayout>
 
 @code {
-    private bool _drawerOpen = true;
-    private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
+    private bool _drawerOpen = false;
+    private bool _isMouseOverDrawer = false;
+    private System.Timers.Timer? _closeTimer;
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private void OnDrawerMouseEnter()
+    {
+        _isMouseOverDrawer = true;
+        _closeTimer?.Stop();
+    }
+
+    private void OnDrawerMouseLeave()
+    {
+        _isMouseOverDrawer = false;
+        StartCloseTimer();
+    }
+
+    private void StartCloseTimer()
+    {
+        _closeTimer?.Stop();
+        _closeTimer = new System.Timers.Timer(800); // Délai de 800ms avant fermeture
+        _closeTimer.Elapsed += (sender, e) =>
+        {
+            InvokeAsync(() =>
+            {
+                if (!_isMouseOverDrawer && _drawerOpen)
+                {
+                    _drawerOpen = false;
+                    StateHasChanged();
+                }
+            });
+            _closeTimer?.Stop();
+        };
+        _closeTimer.Start();
+    }
+
+    private void CloseDrawerIfOpen()
+    {
+        if (_drawerOpen && !_isMouseOverDrawer)
+        {
+            _drawerOpen = false;
+        }
+    }
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        // Ferme le drawer sur mobile après navigation
+        if (IsSmallScreen())
+        {
+            _drawerOpen = false;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private bool IsSmallScreen()
+    {
+        // Cette méthode est une approximation. Pour une détection précise, utilisez JS Interop
+        return true; // À adapter selon vos besoins
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+        _closeTimer?.Stop();
+        _closeTimer?.Dispose();
+    }
 }

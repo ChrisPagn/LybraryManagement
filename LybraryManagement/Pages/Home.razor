@@ -1,7 +1,77 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Accueil</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="home-container">
+    <div class="home-content">
+        <MudPaper Class="welcome-card pa-6" Elevation="3">
+            <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">
+                Bienvenue dans votre bibliothèque
+            </MudText>
+            <MudText Typo="Typo.body1" Align="Align.Center" Class="mt-4">
+                Gérez vos livres, films et jeux en toute simplicité
+            </MudText>
+            <MudDivider Class="my-4" />
+            <MudStack Row Spacing="4" Justify="Justify.Center" Class="mt-6">
+                <MudButton Href="/books" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.MenuBook" Size="Size.Large">
+                    Livres
+                </MudButton>
+                <MudButton Href="/movies" Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Movie" Size="Size.Large">
+                    Films
+                </MudButton>
+                <MudButton Href="/games" Variant="Variant.Filled" Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.SportsEsports" Size="Size.Large">
+                    Jeux
+                </MudButton>
+            </MudStack>
+        </MudPaper>
+    </div>
+</div>
 
-Welcome to your new app. test1234
+<style>
+    .home-container {
+        position: relative;
+        min-height: calc(100vh - 64px);
+        background-image: url('/images/library-bg.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .home-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+    .home-content {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 800px;
+        padding: 2rem;
+    }
+
+    .welcome-card {
+        background: rgba(255, 255, 255, 0.02) !important;
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(10px) saturate(150%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+        .welcome-card .mud-typography {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .welcome-card .mud-divider {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+</style>
