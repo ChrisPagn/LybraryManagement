@@ -7,56 +7,134 @@
 
 <PageTitle>Films</PageTitle>
 
-<MudPaper Class="pa-4">
-    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-        <MudText Typo="Typo.h5">Films</MudText>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreate">Ajouter</MudButton>
-    </MudStack>
+<div class="page-background"></div>
 
-    <MudTable Items="movies" Dense="true" Hover="true" Class="mt-4">
-        <HeaderContent>
-            <MudTh>ID</MudTh>
-            <MudTh>ItemId</MudTh>
-            <MudTh>Titre</MudTh>
-            <MudTh>Createur</MudTh>
-            <MudTh>Editeur</MudTh>
-            <MudTh>Annee</MudTh>
-            <MudTh>Duree</MudTh>
-            <MudTh>Note</MudTh>
-            <MudTh></MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="ID">@context.MovieId</MudTd>
-            <MudTd DataLabel="ItemId">@context.ItemId</MudTd>
-            <MudTd DataLabel="Titre">@context.Item?.Title</MudTd>
-            <MudTd DataLabel="Createur">@context.Item?.Creator</MudTd>
-            <MudTd DataLabel="Editeur">@context.Item?.Publisher</MudTd>
-            <MudTd DataLabel="Annee">@context.Item?.Year</MudTd>
-            <MudTd DataLabel="Duree">@context.Duration</MudTd>
-            <MudTd DataLabel="Note">@context.Rating</MudTd>
-            <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(context)" />
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
-</MudPaper>
+<div class="content-wrapper animate-in">
+    <MudPaper Class="glass-paper pa-4 mb-4">
+        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.Movie" Size="Size.Large" Style="color: white;" />
+                <MudText Typo="Typo.h5">Films</MudText>
+            </MudStack>
+            <MudButton Color="Color.Primary"
+                       Variant="Variant.Filled"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="OpenCreate"
+                       Size="Size.Large">
+                Ajouter un film
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+
+    <MudPaper Class="glass-paper pa-4">
+        @if (movies == null || !movies.Any())
+        {
+            <MudStack AlignItems="AlignItems.Center" Spacing="4" Class="pa-8">
+                <MudIcon Icon="@Icons.Material.Filled.MovieFilter" Size="Size.Large" Style="color: rgba(255,255,255,0.5); font-size: 5rem;" />
+                <MudText Typo="Typo.h6" Style="color: rgba(255,255,255,0.8);">Aucun film dans votre collection</MudText>
+                <MudText Typo="Typo.body2" Style="color: rgba(255,255,255,0.6);">Commencez par ajouter votre premier film</MudText>
+            </MudStack>
+        }
+        else
+        {
+            <MudTable Items="movies" Dense="true" Hover="true" Class="mt-2">
+                <HeaderContent>
+                    <MudTh>ID</MudTh>
+                    <MudTh>Titre</MudTh>
+                    <MudTh>Réalisateur</MudTh>
+                    <MudTh>Studio</MudTh>
+                    <MudTh>Année</MudTh>
+                    <MudTh>Durée</MudTh>
+                    <MudTh>Classification</MudTh>
+                    <MudTh Style="text-align: right;">Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="ID">@context.MovieId</MudTd>
+                    <MudTd DataLabel="Titre"><strong>@context.Item?.Title</strong></MudTd>
+                    <MudTd DataLabel="Réalisateur">@context.Item?.Creator</MudTd>
+                    <MudTd DataLabel="Studio">@context.Item?.Publisher</MudTd>
+                    <MudTd DataLabel="Année">@context.Item?.Year</MudTd>
+                    <MudTd DataLabel="Durée">
+                        @if (context.Duration.HasValue)
+                        {
+                            <span>@FormatDuration(context.Duration.Value)</span>
+                        }
+                    </MudTd>
+                    <MudTd DataLabel="Classification">@context.Rating</MudTd>
+                    <MudTd DataLabel="Actions" Style="text-align: right;">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Info"
+                                       Size="Size.Small"
+                                       OnClick="() => OpenEdit(context)"
+                                       Title="Modifier" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="() => Delete(context)"
+                                       Title="Supprimer" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudPaper>
+</div>
 
 @if (dialogVisible)
 {
-    <MudPaper Class="pa-4 mt-4">
-        <MudText Typo="Typo.h6">@dialogTitle</MudText>
-        <MudForm @ref="form">
-            <MudNumericField T="int" @bind-Value="itemId" Label="ItemId" Required="true" />
-            <MudTextField @bind-Value="durationText" Label="Duree (hh:mm:ss)" />
-            <MudTextField @bind-Value="rating" Label="Note" />
-        </MudForm>
-        <MudStack Row Spacing="2" Class="mt-2">
-            <MudButton OnClick="Save" Color="Color.Primary">Enregistrer</MudButton>
-            <MudButton OnClick="() => dialogVisible = false">Annuler</MudButton>
-        </MudStack>
-    </MudPaper>
+    <MudOverlay Visible="true" DarkBackground="true" Absolute="false" />
+    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1400; width: 90%; max-width: 600px;">
+        <MudPaper Class="dark-glass-paper pa-6 animate-in">
+            <MudStack Spacing="3">
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <MudText Typo="Typo.h6" Style="color: white;">@dialogTitle</MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                   Color="Color.Default"
+                                   OnClick="() => dialogVisible = false"
+                                   Style="color: white;" />
+                </MudStack>
+
+                <MudDivider Style="background-color: rgba(255,255,255,0.2);" />
+
+                <MudForm @ref="form">
+                    <MudStack Spacing="3">
+                        <MudNumericField T="int"
+                                         @bind-Value="itemId"
+                                         Label="ID de l'item"
+                                         Required="true"
+                                         Variant="Variant.Outlined" />
+
+                        <MudTextField @bind-Value="durationText"
+                                      Label="Durée (format: hh:mm:ss)"
+                                      Placeholder="02:15:00"
+                                      HelperText="Exemple: 02:15:00 pour 2h15"
+                                      Variant="Variant.Outlined" />
+
+                        <MudTextField @bind-Value="rating"
+                                      Label="Classification"
+                                      Placeholder="Tout public, PG-13, R..."
+                                      HelperText="Ex: Tout public, -12, -16, -18"
+                                      Variant="Variant.Outlined" />
+                    </MudStack>
+                </MudForm>
+
+                <MudStack Row Spacing="2" Justify="Justify.SpaceEvenly" Class="mt-2">
+                    <MudButton OnClick="() => dialogVisible = false"
+                               Variant="Variant.Text"
+                               Style="color: white;">
+                        Annuler
+                    </MudButton>
+                    <MudButton OnClick="Save"
+                               Color="Color.Primary"
+                               Variant="Variant.Filled">
+                        Enregistrer
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+    </div>
 }
+
+<link rel="stylesheet" href="css/library-theme.css" />
 
 @code {
     private List<MovieDto> movies = new();
@@ -84,10 +162,10 @@
 
     private void OpenEdit(MovieDto dto)
     {
-        dialogTitle = $"Modifier #" + dto.MovieId;
+        dialogTitle = $"Modifier le film #{dto.MovieId}";
         editingId = dto.MovieId;
         itemId = dto.ItemId;
-        durationText = dto.Duration?.ToString();
+        durationText = dto.Duration?.ToString(@"hh\:mm\:ss");
         rating = dto.Rating;
         dialogVisible = true;
     }
@@ -104,25 +182,33 @@
         if (editingId is null)
         {
             var resp = await ApiClient.PostAsync(HttpFactory, "api/movies", new CreateMovieDto(itemId, duration, rating));
-            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de creation", Severity.Error); return; }
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de création", Severity.Error); return; }
+            Snackbar.Add("Film créé avec succès", Severity.Success);
         }
         else
         {
             var resp = await ApiClient.PutAsync(HttpFactory, $"api/movies/{editingId}", new UpdateMovieDto(itemId, duration, rating));
-            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise a jour", Severity.Error); return; }
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise à jour", Severity.Error); return; }
+            Snackbar.Add("Film modifié avec succès", Severity.Success);
         }
 
         dialogVisible = false;
         await LoadAsync();
-        Snackbar.Add("Enregistre", Severity.Success);
     }
 
     private async Task Delete(MovieDto dto)
     {
         var resp = await ApiClient.DeleteAsync(HttpFactory, $"api/movies/{dto.MovieId}");
-        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression echouee", Severity.Error); return; }
+        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression échouée", Severity.Error); return; }
         await LoadAsync();
-        Snackbar.Add("Supprime", Severity.Success);
+        Snackbar.Add("Film supprimé", Severity.Success);
+    }
+
+    private string FormatDuration(TimeSpan duration)
+    {
+        if (duration.TotalHours >= 1)
+            return $"{(int)duration.TotalHours}h{duration.Minutes:00}";
+        else
+            return $"{duration.Minutes}min";
     }
 }
-

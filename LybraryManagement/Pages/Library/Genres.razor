@@ -7,42 +7,104 @@
 
 <PageTitle>Genres</PageTitle>
 
-<MudPaper Class="pa-4">
-    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-        <MudText Typo="Typo.h5">Genres</MudText>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreate">Ajouter</MudButton>
-    </MudStack>
+<div class="page-background"></div>
 
-    <MudTable Items="genres" Dense="true" Hover="true" Class="mt-4">
-        <HeaderContent>
-            <MudTh>ID</MudTh>
-            <MudTh>Nom</MudTh>
-            <MudTh></MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="ID">@context.GenreId</MudTd>
-            <MudTd DataLabel="Nom">@context.Name</MudTd>
-            <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(context)" />
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
-</MudPaper>
+<div class="content-wrapper animate-in">
+    <MudPaper Class="glass-paper pa-4 mb-4">
+        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.Style" Size="Size.Large" Style="color: white;" />
+                <MudText Typo="Typo.h5">Genres</MudText>
+            </MudStack>
+            <MudButton Color="Color.Primary"
+                       Variant="Variant.Filled"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="OpenCreate"
+                       Size="Size.Large">
+                Ajouter un genre
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+
+    <MudPaper Class="glass-paper pa-4">
+        @if (genres == null || !genres.Any())
+        {
+            <MudStack AlignItems="AlignItems.Center" Spacing="4" Class="pa-8">
+                <MudIcon Icon="@Icons.Material.Filled.LocalLibrary" Size="Size.Large" Style="color: rgba(255,255,255,0.5); font-size: 5rem;" />
+                <MudText Typo="Typo.h6" Style="color: rgba(255,255,255,0.8);">Aucun genre</MudText>
+                <MudText Typo="Typo.body2" Style="color: rgba(255,255,255,0.6);">Commencez par créer votre premier genre</MudText>
+            </MudStack>
+        }
+        else
+        {
+            <MudTable Items="genres" Dense="true" Hover="true" Class="mt-2">
+                <HeaderContent>
+                    <MudTh>ID</MudTh>
+                    <MudTh>Nom</MudTh>
+                    <MudTh Style="text-align: right;">Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="ID">@context.GenreId</MudTd>
+                    <MudTd DataLabel="Nom"><strong>@context.Name</strong></MudTd>
+                    <MudTd DataLabel="Actions" Style="text-align: right;">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Info"
+                                       Size="Size.Small"
+                                       OnClick="() => OpenEdit(context)"
+                                       Title="Modifier" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="() => Delete(context)"
+                                       Title="Supprimer" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudPaper>
+</div>
 
 @if (dialogVisible)
 {
-    <MudPaper Class="pa-4 mt-4">
-        <MudText Typo="Typo.h6">@dialogTitle</MudText>
-        <MudForm @ref="form">
-            <MudTextField @bind-Value="name" Label="Nom" Required="true" />
-        </MudForm>
-        <MudStack Row Spacing="2" Class="mt-2">
-            <MudButton OnClick="Save" Color="Color.Primary">Enregistrer</MudButton>
-            <MudButton OnClick="() => dialogVisible = false">Annuler</MudButton>
-        </MudStack>
-    </MudPaper>
+    <MudOverlay Visible="true" DarkBackground="true" Absolute="false" />
+    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1400; width: 90%; max-width: 600px;">
+        <MudPaper Class="dark-glass-paper pa-6 animate-in">
+            <MudStack Spacing="3">
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <MudText Typo="Typo.h6" Style="color: white;">@dialogTitle</MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                   Color="Color.Default"
+                                   OnClick="() => dialogVisible = false"
+                                   Style="color: white;" />
+                </MudStack>
+
+                <MudDivider Style="background-color: rgba(255,255,255,0.2);" />
+
+                <MudForm @ref="form">
+                    <MudTextField @bind-Value="name"
+                                  Label="Nom du genre"
+                                  Required="true"
+                                  Variant="Variant.Outlined" />
+                </MudForm>
+
+                <MudStack Row Spacing="2" Justify="Justify.SpaceEvenly" Class="mt-2">
+                    <MudButton OnClick="() => dialogVisible = false"
+                               Variant="Variant.Text"
+                               Style="color: white;">
+                        Annuler
+                    </MudButton>
+                    <MudButton OnClick="Save"
+                               Color="Color.Primary"
+                               Variant="Variant.Filled">
+                        Enregistrer
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+    </div>
 }
+
+<link rel="stylesheet" href="css/library-theme.css" />
 
 @code {
     private List<GenreDto> genres = new();
@@ -66,7 +128,7 @@
 
     private void OpenEdit(GenreDto dto)
     {
-        dialogTitle = $"Modifier #" + dto.GenreId;
+        dialogTitle = $"Modifier le genre #{dto.GenreId}";
         editingId = dto.GenreId;
         name = dto.Name;
         dialogVisible = true;
@@ -81,16 +143,17 @@
         {
             var resp = await ApiClient.PostAsync(HttpFactory, "api/genres", new CreateGenreDto(name));
             if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de création", Severity.Error); return; }
+            Snackbar.Add("Genre créé avec succès", Severity.Success);
         }
         else
         {
             var resp = await ApiClient.PutAsync(HttpFactory, $"api/genres/{editingId}", new UpdateGenreDto(name));
             if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise à jour", Severity.Error); return; }
+            Snackbar.Add("Genre modifié avec succès", Severity.Success);
         }
 
         dialogVisible = false;
         await LoadAsync();
-        Snackbar.Add("Enregistré", Severity.Success);
     }
 
     private async Task Delete(GenreDto dto)
@@ -98,6 +161,6 @@
         var resp = await ApiClient.DeleteAsync(HttpFactory, $"api/genres/{dto.GenreId}");
         if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression échouée", Severity.Error); return; }
         await LoadAsync();
-        Snackbar.Add("Supprimé", Severity.Success);
+        Snackbar.Add("Genre supprimé", Severity.Success);
     }
 }

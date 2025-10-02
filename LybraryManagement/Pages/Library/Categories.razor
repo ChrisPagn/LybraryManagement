@@ -7,45 +7,113 @@
 
 <PageTitle>Catégories</PageTitle>
 
-<MudPaper Class="pa-4">
-    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-        <MudText Typo="Typo.h5">Catégories</MudText>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreate">Ajouter</MudButton>
-    </MudStack>
+<div class="page-background"></div>
 
-    <MudTable Items="categories" Dense="true" Hover="true" Class="mt-4">
-        <HeaderContent>
-            <MudTh>ID</MudTh>
-            <MudTh>Nom</MudTh>
-            <MudTh>Description</MudTh>
-            <MudTh></MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="ID">@context.CategoryId</MudTd>
-            <MudTd DataLabel="Nom">@context.Name</MudTd>
-            <MudTd DataLabel="Description">@context.Description</MudTd>
-            <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(context)" />
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
-</MudPaper>
+<div class="content-wrapper animate-in">
+    <MudPaper Class="glass-paper pa-4 mb-4">
+        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.Category" Size="Size.Large" Style="color: white;" />
+                <MudText Typo="Typo.h5">Catégories</MudText>
+            </MudStack>
+            <MudButton Color="Color.Primary"
+                       Variant="Variant.Filled"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="OpenCreate"
+                       Size="Size.Large">
+                Ajouter une catégorie
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+
+    <MudPaper Class="glass-paper pa-4">
+        @if (categories == null || !categories.Any())
+        {
+            <MudStack AlignItems="AlignItems.Center" Spacing="4" Class="pa-8">
+                <MudIcon Icon="@Icons.Material.Filled.FolderOff" Size="Size.Large" Style="color: rgba(255,255,255,0.5); font-size: 5rem;" />
+                <MudText Typo="Typo.h6" Style="color: rgba(255,255,255,0.8);">Aucune catégorie</MudText>
+                <MudText Typo="Typo.body2" Style="color: rgba(255,255,255,0.6);">Commencez par créer votre première catégorie</MudText>
+            </MudStack>
+        }
+        else
+        {
+            <MudTable Items="categories" Dense="true" Hover="true" Class="mt-2">
+                <HeaderContent>
+                    <MudTh>ID</MudTh>
+                    <MudTh>Nom</MudTh>
+                    <MudTh>Description</MudTh>
+                    <MudTh Style="text-align: right;">Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="ID">@context.CategoryId</MudTd>
+                    <MudTd DataLabel="Nom"><strong>@context.Name</strong></MudTd>
+                    <MudTd DataLabel="Description">@context.Description</MudTd>
+                    <MudTd DataLabel="Actions" Style="text-align: right;">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Info"
+                                       Size="Size.Small"
+                                       OnClick="() => OpenEdit(context)"
+                                       Title="Modifier" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="() => Delete(context)"
+                                       Title="Supprimer" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudPaper>
+</div>
 
 @if (dialogVisible)
 {
-    <MudPaper Class="pa-4 mt-4">
-        <MudText Typo="Typo.h6">@dialogTitle</MudText>
-        <MudForm @ref="form">
-            <MudTextField @bind-Value="name" Label="Nom" Required="true" />
-            <MudTextField @bind-Value="description" Label="Description" />
-        </MudForm>
-        <MudStack Row Spacing="2" Class="mt-2">
-            <MudButton OnClick="Save" Color="Color.Primary">Enregistrer</MudButton>
-            <MudButton OnClick="() => dialogVisible = false">Annuler</MudButton>
-        </MudStack>
-    </MudPaper>
+    <MudOverlay Visible="true" DarkBackground="true" Absolute="false" />
+    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1400; width: 90%; max-width: 600px;">
+        <MudPaper Class="dark-glass-paper pa-6 animate-in">
+            <MudStack Spacing="3">
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <MudText Typo="Typo.h6" Style="color: white;">@dialogTitle</MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                   Color="Color.Default"
+                                   OnClick="() => dialogVisible = false"
+                                   Style="color: white;" />
+                </MudStack>
+
+                <MudDivider Style="background-color: rgba(255,255,255,0.2);" />
+
+                <MudForm @ref="form">
+                    <MudStack Spacing="3">
+                        <MudTextField @bind-Value="name"
+                                      Label="Nom"
+                                      Required="true"
+                                      Variant="Variant.Outlined" />
+
+                        <MudTextField @bind-Value="description"
+                                      Label="Description"
+                                      Lines="3"
+                                      Variant="Variant.Outlined" />
+                    </MudStack>
+                </MudForm>
+
+                <MudStack Row Spacing="2" Justify="Justify.SpaceEvenly" Class="mt-2">
+                    <MudButton OnClick="() => dialogVisible = false"
+                               Variant="Variant.Text"
+                               Style="color: white;">
+                        Annuler
+                    </MudButton>
+                    <MudButton OnClick="Save"
+                               Color="Color.Primary"
+                               Variant="Variant.Filled">
+                        Enregistrer
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+    </div>
 }
+
+<link rel="stylesheet" href="css/library-theme.css" />
 
 @code {
     private List<CategoryDto> categories = new();
@@ -56,11 +124,9 @@
     private string? description;
     private int? editingId;
 
-    protected override async Task OnInitializedAsync()
-        => await LoadAsync();
+    protected override async Task OnInitializedAsync() => await LoadAsync();
 
-    private async Task LoadAsync()
-        => categories = (await ApiClient.GetAsync<List<CategoryDto>>(HttpFactory, "api/categories")) ?? new();
+    private async Task LoadAsync() => categories = (await ApiClient.GetAsync<List<CategoryDto>>(HttpFactory, "api/categories")) ?? new();
 
     private void OpenCreate()
     {
@@ -73,7 +139,7 @@
 
     private void OpenEdit(CategoryDto dto)
     {
-        dialogTitle = $"Modifier #" + dto.CategoryId;
+        dialogTitle = $"Modifier la catégorie #{dto.CategoryId}";
         editingId = dto.CategoryId;
         name = dto.Name;
         description = dto.Description;
@@ -89,16 +155,17 @@
         {
             var resp = await ApiClient.PostAsync(HttpFactory, "api/categories", new CreateCategoryDto(name, description));
             if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de création", Severity.Error); return; }
+            Snackbar.Add("Catégorie créée avec succès", Severity.Success);
         }
         else
         {
             var resp = await ApiClient.PutAsync(HttpFactory, $"api/categories/{editingId}", new UpdateCategoryDto(name, description));
             if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise à jour", Severity.Error); return; }
+            Snackbar.Add("Catégorie modifiée avec succès", Severity.Success);
         }
 
         dialogVisible = false;
         await LoadAsync();
-        Snackbar.Add("Enregistré", Severity.Success);
     }
 
     private async Task Delete(CategoryDto dto)
@@ -106,6 +173,6 @@
         var resp = await ApiClient.DeleteAsync(HttpFactory, $"api/categories/{dto.CategoryId}");
         if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression échouée", Severity.Error); return; }
         await LoadAsync();
-        Snackbar.Add("Supprimé", Severity.Success);
+        Snackbar.Add("Catégorie supprimée", Severity.Success);
     }
 }

@@ -7,56 +7,125 @@
 
 <PageTitle>Jeux</PageTitle>
 
-<MudPaper Class="pa-4">
-    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-        <MudText Typo="Typo.h5">Jeux</MudText>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreate">Ajouter</MudButton>
-    </MudStack>
+<div class="page-background"></div>
 
-    <MudTable Items="games" Dense="true" Hover="true" Class="mt-4">
-        <HeaderContent>
-            <MudTh>ID</MudTh>
-            <MudTh>ItemId</MudTh>
-            <MudTh>Titre</MudTh>
-            <MudTh>Createur</MudTh>
-            <MudTh>Editeur</MudTh>
-            <MudTh>Annee</MudTh>
-            <MudTh>Plateforme</MudTh>
-            <MudTh>Age</MudTh>
-            <MudTh></MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="ID">@context.GameId</MudTd>
-            <MudTd DataLabel="ItemId">@context.ItemId</MudTd>
-            <MudTd DataLabel="Titre">@context.Item?.Title</MudTd>
-            <MudTd DataLabel="Createur">@context.Item?.Creator</MudTd>
-            <MudTd DataLabel="Editeur">@context.Item?.Publisher</MudTd>
-            <MudTd DataLabel="Annee">@context.Item?.Year</MudTd>
-            <MudTd DataLabel="Plateforme">@context.Platform</MudTd>
-            <MudTd DataLabel="Age">@context.AgeRange</MudTd>
-            <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEdit(context)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => Delete(context)" />
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
-</MudPaper>
+<div class="content-wrapper animate-in">
+    <MudPaper Class="glass-paper pa-4 mb-4">
+        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.SportsEsports" Size="Size.Large" Style="color: white;" />
+                <MudText Typo="Typo.h5">Jeux</MudText>
+            </MudStack>
+            <MudButton Color="Color.Primary"
+                       Variant="Variant.Filled"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="OpenCreate"
+                       Size="Size.Large">
+                Ajouter un jeu
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+
+    <MudPaper Class="glass-paper pa-4">
+        @if (games == null || !games.Any())
+        {
+            <MudStack AlignItems="AlignItems.Center" Spacing="4" Class="pa-8">
+                <MudIcon Icon="@Icons.Material.Filled.VideogameAssetOff" Size="Size.Large" Style="color: rgba(255,255,255,0.5); font-size: 5rem;" />
+                <MudText Typo="Typo.h6" Style="color: rgba(255,255,255,0.8);">Aucun jeu dans votre collection</MudText>
+                <MudText Typo="Typo.body2" Style="color: rgba(255,255,255,0.6);">Commencez par ajouter votre premier jeu</MudText>
+            </MudStack>
+        }
+        else
+        {
+            <MudTable Items="games" Dense="true" Hover="true" Class="mt-2">
+                <HeaderContent>
+                    <MudTh>ID</MudTh>
+                    <MudTh>Titre</MudTh>
+                    <MudTh>Créateur</MudTh>
+                    <MudTh>Éditeur</MudTh>
+                    <MudTh>Année</MudTh>
+                    <MudTh>Plateforme</MudTh>
+                    <MudTh>Âge</MudTh>
+                    <MudTh Style="text-align: right;">Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="ID">@context.GameId</MudTd>
+                    <MudTd DataLabel="Titre"><strong>@context.Item?.Title</strong></MudTd>
+                    <MudTd DataLabel="Créateur">@context.Item?.Creator</MudTd>
+                    <MudTd DataLabel="Éditeur">@context.Item?.Publisher</MudTd>
+                    <MudTd DataLabel="Année">@context.Item?.Year</MudTd>
+                    <MudTd DataLabel="Plateforme">@context.Platform</MudTd>
+                    <MudTd DataLabel="Âge">@context.AgeRange</MudTd>
+                    <MudTd DataLabel="Actions" Style="text-align: right;">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Info"
+                                       Size="Size.Small"
+                                       OnClick="() => OpenEdit(context)"
+                                       Title="Modifier" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="() => Delete(context)"
+                                       Title="Supprimer" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudPaper>
+</div>
 
 @if (dialogVisible)
 {
-    <MudPaper Class="pa-4 mt-4">
-        <MudText Typo="Typo.h6">@dialogTitle</MudText>
-        <MudForm @ref="form">
-            <MudNumericField T="int" @bind-Value="itemId" Label="ItemId" Required="true" />
-            <MudTextField @bind-Value="platform" Label="Plateforme" />
-            <MudTextField @bind-Value="ageRange" Label="Age" />
-        </MudForm>
-        <MudStack Row Spacing="2" Class="mt-2">
-            <MudButton OnClick="Save" Color="Color.Primary">Enregistrer</MudButton>
-            <MudButton OnClick="() => dialogVisible = false">Annuler</MudButton>
-        </MudStack>
-    </MudPaper>
+    <MudOverlay Visible="true" DarkBackground="true" Absolute="false" />
+    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1400; width: 90%; max-width: 600px;">
+        <MudPaper Class="dark-glass-paper pa-6 animate-in">
+            <MudStack Spacing="3">
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <MudText Typo="Typo.h6" Style="color: white;">@dialogTitle</MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                   Color="Color.Default"
+                                   OnClick="() => dialogVisible = false"
+                                   Style="color: white;" />
+                </MudStack>
+
+                <MudDivider Style="background-color: rgba(255,255,255,0.2);" />
+
+                <MudForm @ref="form">
+                    <MudStack Spacing="3">
+                        <MudNumericField T="int"
+                                         @bind-Value="itemId"
+                                         Label="ID de l'item"
+                                         Required="true"
+                                         Variant="Variant.Outlined" />
+
+                        <MudTextField @bind-Value="platform"
+                                      Label="Plateforme (ex: PlayStation 5, Xbox, PC)"
+                                      Variant="Variant.Outlined" />
+
+                        <MudTextField @bind-Value="ageRange"
+                                      Label="Tranche d'âge (ex: 12+, 18+)"
+                                      Variant="Variant.Outlined" />
+                    </MudStack>
+                </MudForm>
+
+                <MudStack Row Spacing="2" Justify="Justify.SpaceEvenly" Class="mt-2">
+                    <MudButton OnClick="() => dialogVisible = false"
+                               Variant="Variant.Text"
+                               Style="color: white;">
+                        Annuler
+                    </MudButton>
+                    <MudButton OnClick="Save"
+                               Color="Color.Primary"
+                               Variant="Variant.Filled">
+                        Enregistrer
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+    </div>
 }
+
+<link rel="stylesheet" href="css/library-theme.css" />
 
 @code {
     private List<GameDto> games = new();
@@ -84,7 +153,7 @@
 
     private void OpenEdit(GameDto dto)
     {
-        dialogTitle = $"Modifier #" + dto.GameId;
+        dialogTitle = $"Modifier le jeu #{dto.GameId}";
         editingId = dto.GameId;
         itemId = dto.ItemId;
         platform = dto.Platform;
@@ -100,25 +169,25 @@
         if (editingId is null)
         {
             var resp = await ApiClient.PostAsync(HttpFactory, "api/games", new CreateGameDto(itemId, platform, ageRange));
-            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de creation", Severity.Error); return; }
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de création", Severity.Error); return; }
+            Snackbar.Add("Jeu créé avec succès", Severity.Success);
         }
         else
         {
             var resp = await ApiClient.PutAsync(HttpFactory, $"api/games/{editingId}", new UpdateGameDto(itemId, platform, ageRange));
-            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise a jour", Severity.Error); return; }
+            if (!resp.IsSuccessStatusCode) { Snackbar.Add("Erreur de mise à jour", Severity.Error); return; }
+            Snackbar.Add("Jeu modifié avec succès", Severity.Success);
         }
 
         dialogVisible = false;
         await LoadAsync();
-        Snackbar.Add("Enregistre", Severity.Success);
     }
 
     private async Task Delete(GameDto dto)
     {
         var resp = await ApiClient.DeleteAsync(HttpFactory, $"api/games/{dto.GameId}");
-        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression echouee", Severity.Error); return; }
+        if (!resp.IsSuccessStatusCode) { Snackbar.Add("Suppression échouée", Severity.Error); return; }
         await LoadAsync();
-        Snackbar.Add("Supprime", Severity.Success);
+        Snackbar.Add("Jeu supprimé", Severity.Success);
     }
 }
-
