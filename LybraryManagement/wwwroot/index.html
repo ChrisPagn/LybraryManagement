@@ -1,161 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Gestion de ma librairie.</title>
+        <base href="/" />
+        <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="css/app.css" />
+        <link rel="stylesheet" href="css/library-theme.css" />
+        <link rel="stylesheet" href="css/library-theme-index.css" />
+        <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="icon" type="image/png" href="favicon1.png" />
+        <link href="LybraryManagement.styles.css" rel="stylesheet" />
+    </head>
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LybraryManagement</title>
-    <base href="/" />
-    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="css/app.css" />
-    <link rel="stylesheet" href="css/library-theme.css" />
-    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <link href="LybraryManagement.styles.css" rel="stylesheet" />
-</head>
+    <body>
+        <div id="app">
+            <div class="loading-container">
+                <!-- Cadre décoratif -->
+                <div class="decorative-frame">
+                    <div class="frame-corner frame-corner-tl"></div>
+                    <div class="frame-corner frame-corner-tr"></div>
+                    <div class="frame-corner frame-corner-bl"></div>
+                    <div class="frame-corner frame-corner-br"></div>
+                    <div class="frame-border frame-border-top"></div>
+                    <div class="frame-border frame-border-right"></div>
+                    <div class="frame-border frame-border-bottom"></div>
+                    <div class="frame-border frame-border-left"></div>
+                </div>
 
-<!--<body>
-    <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
-    </div>
+                <!-- Image de fond -->
+                <img src="images/library-bg-index.jpg" alt="Bibliothèque" class="library-image" />
 
-    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="." class="reload">Reload</a>
-        <span class="dismiss">🗙</span>
-    </div>
-    <script src="_framework/blazor.webassembly.js"></script>
-    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
-</body>-->
+                <!-- Animation centrale -->
+                <div class="loading-content">
+                    <!-- Lumière de lampe -->
+                    <div class="lamp-light"></div>
 
-<body>
-    <!-- Animation de chargement personnalisée -->
-    <div id="app">
-        <div class="loading-container">
-            <img src="images/library-bg-index.jpg" alt="Bibliothèque" class="library-image" />
-            <div class="book"></div>
-            <div class="lamp-light"></div>
-            <div class="loading-text">Chargement de la bibliothèque...</div>
+                    <!-- Texte de chargement -->
+                    <div class="loading-text-container">
+                        <h2 class="loading-title">Bibliothèque Personnelle</h2>
+                        <div class="loading-text">
+                            <span class="loading-dot">.</span>
+                            <span class="loading-dot">.</span>
+                            <span class="loading-dot">.</span>
+                        </div>
+                        <p class="loading-subtitle">Préparation de votre collection</p>
+                    </div>
+
+                    <!-- Barre de progression -->
+                    <div class="progress-bar-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="." class="reload">Reload</a>
-        <span class="dismiss">🗙</span>
-    </div>
+        <div id="blazor-error-ui">
+            An unhandled error has occurred.
+            <a href="." class="reload">Reload</a>
+            <span class="dismiss">🗙</span>
+        </div>
 
-    <script src="_framework/blazor.webassembly.js"></script>
-    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
-
-    <!-- Style CSS pour l'animation -->
-    <style>
-        .loading-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f5f0e6;
-            z-index: 9999;
-            transition: opacity 1s ease-in-out;
-        }
-
-        .library-image {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: blur(1px);
-            z-index: 1;
-        }
-
-        .book {
-            position: absolute;
-            width: 200px;
-            height: 150px;
-            bottom: 30%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-image: url('images/leather-book.jpg');
-            background-size: cover;
-            z-index: 2;
-            animation: openBook 4s ease-in-out infinite;
-        }
-
-        .lamp-light {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(255, 220, 130, 0.6) 0%, transparent 70%);
-            border-radius: 50%;
-            top: 20%;
-            left: 40%;
-            z-index: 3;
-            animation: flickerLight 3s ease-in-out infinite alternate;
-        }
-
-        .loading-text {
-            position: absolute;
-            bottom: 20%;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #5a3e2b;
-            font-family: 'Times New Roman', serif;
-            font-size: 1.5rem;
-            z-index: 4;
-        }
-
-        @keyframes openBook {
-            0% {
-                transform: translateX(-50%) rotateY(0deg);
-            }
-
-            50% {
-                transform: translateX(-50%) rotateY(-30deg);
-            }
-
-            100% {
-                transform: translateX(-50%) rotateY(0deg);
-            }
-        }
-
-        @keyframes flickerLight {
-            0% {
-                opacity: 0.7;
-            }
-
-            50% {
-                opacity: 0.9;
-            }
-
-            100% {
-                opacity: 0.6;
-            }
-        }
-    </style>
-
-    <!-- Script pour masquer l'animation après le chargement -->
-    <script>
-        window.addEventListener('load', function () {
-            setTimeout(function () {
-                const loadingContainer = document.querySelector('.loading-container');
-                loadingContainer.style.opacity = '0';
-                setTimeout(() => {
-                    loadingContainer.style.display = 'none';
-                }, 1000);
-            }, 3000); // 3 secondes pour l'animation
-        });
-    </script>
-</body>
-
-
+        <script src="_framework/blazor.webassembly.js"></script>
+        <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+        <script>
+            window.addEventListener('load', function () {
+                setTimeout(function () {
+                    const loadingContainer = document.querySelector('.loading-container');
+                    loadingContainer.classList.add('fade-out');
+                    setTimeout(() => {
+                        loadingContainer.style.display = 'none';
+                    }, 1000);
+                }, 3000);
+            });
+        </script>
+    </body>
 </html>
