@@ -1,4 +1,4 @@
-@page "/items"
+ï»¿@page "/items"
 @using System.Linq
 @using MudBlazor
 @using LybraryManagement.Services
@@ -17,9 +17,9 @@
                 <MudIcon Icon="@Icons.Material.Filled.Inventory" Size="Size.Large" Style="color: white;" />
                 <MudText Typo="Typo.h5">Tous les items</MudText>
             </MudStack>
-            <MudButton Color="Color.Primary" 
-                       Variant="Variant.Filled" 
-                       StartIcon="@Icons.Material.Filled.Add" 
+            <MudButton Color="Color.Primary"
+                       Variant="Variant.Filled"
+                       StartIcon="@Icons.Material.Filled.Add"
                        OnClick="OpenCreate"
                        Size="Size.Large">
                 Ajouter un item
@@ -77,7 +77,7 @@
         {
             <MudStack AlignItems="AlignItems.Center" Spacing="4" Class="pa-8">
                 <MudIcon Icon="@Icons.Material.Filled.FilterAltOff" Size="Size.Large" Style="color: rgba(255,255,255,0.5); font-size: 5rem;" />
-                <MudText Typo="Typo.h6" Style="color: rgba(255,255,255,0.8);">Aucun résultat pour ce filtre</MudText>
+                <MudText Typo="Typo.h6" Style="color: rgba(255,255,255,0.8);">Aucun rÃ©sultat pour ce filtre</MudText>
                 <MudText Typo="Typo.body2" Style="color: rgba(255,255,255,0.6);">Essayez un autre filtre</MudText>
             </MudStack>
         }
@@ -88,9 +88,9 @@
                     <MudTh>ID</MudTh>
                     <MudTh>Titre</MudTh>
                     <MudTh>Type</MudTh>
-                    <MudTh>Créateur</MudTh>
-                    <MudTh>Éditeur</MudTh>
-                    <MudTh>Année</MudTh>
+                    <MudTh>CrÃ©ateur</MudTh>
+                    <MudTh>Ã‰diteur</MudTh>
+                    <MudTh>AnnÃ©e</MudTh>
                     <MudTh Style="text-align: right;">Actions</MudTh>
                 </HeaderContent>
                 <RowTemplate>
@@ -104,19 +104,19 @@
                             @GetItemType(context.ItemId)
                         </MudChip>
                     </MudTd>
-                    <MudTd DataLabel="Créateur">@context.Creator</MudTd>
-                    <MudTd DataLabel="Éditeur">@context.Publisher</MudTd>
-                    <MudTd DataLabel="Année">@context.Year</MudTd>
+                    <MudTd DataLabel="CrÃ©ateur">@context.Creator</MudTd>
+                    <MudTd DataLabel="Ã‰diteur">@context.Publisher</MudTd>
+                    <MudTd DataLabel="AnnÃ©e">@context.Year</MudTd>
                     <MudTd DataLabel="Actions" Style="text-align: right;">
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit" 
-                                       Color="Color.Info" 
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Info"
                                        Size="Size.Small"
-                                       OnClick="() => OpenEdit(context)" 
+                                       OnClick="@(async () => await OpenEdit(context))"
                                        Title="Modifier" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" 
-                                       Color="Color.Error" 
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
                                        Size="Size.Small"
-                                       OnClick="async () => await Delete(context)"
+                                       OnClick="@(async () => await Delete(context))"
                                        Title="Supprimer" />
                     </MudTd>
                 </RowTemplate>
@@ -127,63 +127,76 @@
 
 @if (dialogVisible)
 {
-    <MudOverlay Visible="true" DarkBackground="true" Absolute="false" />
-    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1400; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto;">
-        <MudPaper Class="dark-glass-paper pa-6 animate-in">
+    <!-- Overlay SOUS le dialog -->
+    <MudOverlay Visible="true"
+                DarkBackground="true"
+                Absolute="true"
+                Style="z-index:1300;" />
+
+    <!-- Dialog AU-DESSUS de lâ€™overlay -->
+    <div style="
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1401;
+            width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto;
+            pointer-events: auto;">
+        <MudPaper Class="dark-glass-paper pa-6 animate-in" Style="pointer-events:auto;">
             <MudStack Spacing="3">
                 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudText Typo="Typo.h6" Style="color: white;">@dialogTitle</MudText>
-                    <MudIconButton Icon="@Icons.Material.Filled.Close" 
-                                   Color="Color.Default" 
-                                   OnClick="() => dialogVisible = false"
+                    <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                   Color="Color.Default"
+                                   OnClick="@(() => dialogVisible = false)"
                                    Style="color: white;" />
                 </MudStack>
-                
+
                 <MudDivider Style="background-color: rgba(255,255,255,0.2);" />
-                
+
                 <MudForm @ref="form">
                     <MudStack Spacing="3">
-                        <MudText Typo="Typo.subtitle1" Style="color: rgba(255,255,255,0.9); font-weight: 600;">Informations générales</MudText>
-                        
-                        <MudSelect T="string" 
-                                   Label="Type d'item" 
-                                   @bind-Value="itemType" 
-                                   Required="true" 
+                        <MudText Typo="Typo.subtitle1" Style="color: rgba(255,255,255,0.9); font-weight: 600;">Informations gÃ©nÃ©rales</MudText>
+
+                        <MudSelect T="string"
+                                   Label="Type d'item"
+                                   @bind-Value="itemType"
+                                   Required="true"
                                    Disabled="@(editingId.HasValue)"
                                    Variant="Variant.Outlined">
-                            <MudSelectItem Value="@("Book")">?? Livre</MudSelectItem>
-                            <MudSelectItem Value="@("Game")">?? Jeu</MudSelectItem>
-                            <MudSelectItem Value="@("Movie")">?? Film</MudSelectItem>
+                            <MudSelectItem Value="@("Book")">ðŸ“š Livre</MudSelectItem>
+                            <MudSelectItem Value="@("Game")">ðŸŽ® Jeu</MudSelectItem>
+                            <MudSelectItem Value="@("Movie")">ðŸŽ¬ Film</MudSelectItem>
                         </MudSelect>
 
-                        <MudTextField @bind-Value="title" 
-                                     Label="Titre" 
-                                     Required="true"
-                                     Variant="Variant.Outlined" />
-                        
-                        <MudTextField @bind-Value="creator" 
-                                     Label="Créateur / Auteur"
-                                     Variant="Variant.Outlined" />
-                        
-                        <MudTextField @bind-Value="publisher" 
-                                     Label="Éditeur"
-                                     Variant="Variant.Outlined" />
-                        
-                        <MudNumericField T="int?" 
-                                        @bind-Value="year" 
-                                        Label="Année"
-                                        Variant="Variant.Outlined" />
-                        
-                        <MudTextField @bind-Value="description" 
-                                     Label="Description" 
-                                     Lines="3"
-                                     Variant="Variant.Outlined" />
+                        <MudTextField @bind-Value="title"
+                                      Label="Titre"
+                                      Required="true"
+                                      Variant="Variant.Outlined"
+                                      AutoFocus="true" />
 
-                        <MudSelect T="int?" 
-                                   Label="Catégorie" 
-                                   @bind-Value="selectedCategoryId" 
-                                   Clearable="true" 
-                                   Placeholder="Toutes catégories"
+                        <MudTextField @bind-Value="creator"
+                                      Label="CrÃ©ateur / Auteur"
+                                      Variant="Variant.Outlined" />
+
+                        <MudTextField @bind-Value="publisher"
+                                      Label="Ã‰diteur"
+                                      Variant="Variant.Outlined" />
+
+                        <MudNumericField T="int?"
+                                         @bind-Value="year"
+                                         Label="AnnÃ©e"
+                                         Variant="Variant.Outlined" />
+
+                        <MudTextField @bind-Value="description"
+                                      Label="Description"
+                                      Lines="3"
+                                      Variant="Variant.Outlined" />
+
+                        <MudSelect T="int?"
+                                   Label="CatÃ©gorie"
+                                   @bind-Value="selectedCategoryId"
+                                   Clearable="true"
+                                   Placeholder="Toutes catÃ©gories"
                                    Variant="Variant.Outlined">
                             @foreach (var category in categories)
                             {
@@ -191,11 +204,11 @@
                             }
                         </MudSelect>
 
-                        <MudSelect T="int?" 
-                                   Label="Sous-catégorie" 
-                                   @bind-Value="subcategoryId" 
-                                   Clearable="true" 
-                                   Placeholder="Sans sous-catégorie"
+                        <MudSelect T="int?"
+                                   Label="Sous-catÃ©gorie"
+                                   @bind-Value="subcategoryId"
+                                   Clearable="true"
+                                   Placeholder="Sans sous-catÃ©gorie"
                                    Variant="Variant.Outlined">
                             @foreach (var subcategory in FilteredSubcategories)
                             {
@@ -203,18 +216,18 @@
                             }
                         </MudSelect>
 
-                        <MudTextField @bind-Value="imageUrl" 
-                                     Label="URL de l'image"
-                                     Variant="Variant.Outlined" />
+                        <MudTextField @bind-Value="imageUrl"
+                                      Label="URL de l'image"
+                                      Variant="Variant.Outlined" />
 
                         <MudDivider Style="background-color: rgba(255,255,255,0.2);" Class="my-2" />
-                        <MudText Typo="Typo.subtitle1" Style="color: rgba(255,255,255,0.9); font-weight: 600;">Informations spécifiques</MudText>
+                        <MudText Typo="Typo.subtitle1" Style="color: rgba(255,255,255,0.9); font-weight: 600;">Informations spÃ©cifiques</MudText>
 
                         @if (itemType == "Book")
                         {
-                            <MudSelect T="int?" 
-                                       Label="Genre littéraire" 
-                                       @bind-Value="genreId" 
+                            <MudSelect T="int?"
+                                       Label="Genre littÃ©raire"
+                                       @bind-Value="genreId"
                                        Clearable="true"
                                        Variant="Variant.Outlined">
                                 @foreach (var genre in genres)
@@ -222,39 +235,39 @@
                                     <MudSelectItem Value="@((int?)genre.GenreId)">@genre.Name</MudSelectItem>
                                 }
                             </MudSelect>
-                            <MudTextField @bind-Value="isbn" 
-                                         Label="ISBN"
-                                         Variant="Variant.Outlined" />
+                            <MudTextField @bind-Value="isbn"
+                                          Label="ISBN"
+                                          Variant="Variant.Outlined" />
                         }
                         else if (itemType == "Game")
                         {
-                            <MudTextField @bind-Value="platform" 
-                                         Label="Plateforme (ex: PlayStation 5, Xbox, PC)"
-                                         Variant="Variant.Outlined" />
-                            <MudTextField @bind-Value="ageRange" 
-                                         Label="Tranche d'âge (ex: 12+, 18+)"
-                                         Variant="Variant.Outlined" />
+                            <MudTextField @bind-Value="platform"
+                                          Label="Plateforme (ex: PlayStation 5, Xbox, PC)"
+                                          Variant="Variant.Outlined" />
+                            <MudTextField @bind-Value="ageRange"
+                                          Label="Tranche d'Ã¢ge (ex: 12+, 18+)"
+                                          Variant="Variant.Outlined" />
                         }
                         else if (itemType == "Movie")
                         {
-                            <MudTextField @bind-Value="durationText" 
-                                         Label="Durée (format: hh:mm:ss)"
-                                         Placeholder="02:15:00"
-                                         Variant="Variant.Outlined" />
-                            <MudTextField @bind-Value="rating" 
-                                         Label="Classification (ex: PG-13, R, Tout public)"
-                                         Variant="Variant.Outlined" />
+                            <MudTextField @bind-Value="durationText"
+                                          Label="DurÃ©e (format: hh:mm:ss)"
+                                          Placeholder="02:15:00"
+                                          Variant="Variant.Outlined" />
+                            <MudTextField @bind-Value="rating"
+                                          Label="Classification (ex: PG-13, R, Tout public)"
+                                          Variant="Variant.Outlined" />
                         }
                     </MudStack>
                 </MudForm>
-                
+
                 <MudStack Row Spacing="2" Justify="Justify.SpaceEvenly" Class="mt-2">
-                    <MudButton OnClick="() => dialogVisible = false" 
+                    <MudButton OnClick="@(() => dialogVisible = false)"
                                Variant="Variant.Text"
                                Style="color: white;">
                         Annuler
                     </MudButton>
-                    <MudButton OnClick="Save" 
+                    <MudButton OnClick="Save"
                                Color="Color.Primary"
                                Variant="Variant.Filled">
                         Enregistrer
@@ -266,6 +279,19 @@
 }
 
 <link rel="stylesheet" href="css/library-theme.css" />
+
+<style>
+    /* Tu peux dÃ©placer ceci dans css/library-theme.css */
+    .page-background {
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* S'assure que les surfaces UI acceptent les clics */
+    .dark-glass-paper, .glass-paper, .content-wrapper {
+        pointer-events: auto;
+    }
+</style>
 
 @code {
     private enum ItemFilter { All, Books, Games, Movies }
@@ -321,7 +347,7 @@
         if (bookItemIds.Contains(itemId)) return "Livre";
         if (gameItemIds.Contains(itemId)) return "Jeu";
         if (movieItemIds.Contains(itemId)) return "Film";
-        return "Non défini";
+        return "Non dÃ©fini";
     }
 
     private Color GetTypeColor(int itemId)
@@ -377,7 +403,7 @@
         dialogVisible = true;
     }
 
-    private void OpenEdit(ItemDto dto)
+    private async Task OpenEdit(ItemDto dto)
     {
         dialogTitle = $"Modifier l'item #{dto.ItemId}";
         editingId = dto.ItemId;
@@ -397,23 +423,23 @@
         if (bookItemIds.Contains(dto.ItemId))
         {
             itemType = "Book";
-            LoadBookData(dto.ItemId);
+            await LoadBookData(dto.ItemId);
         }
         else if (gameItemIds.Contains(dto.ItemId))
         {
             itemType = "Game";
-            LoadGameData(dto.ItemId);
+            await LoadGameData(dto.ItemId);
         }
         else if (movieItemIds.Contains(dto.ItemId))
         {
             itemType = "Movie";
-            LoadMovieData(dto.ItemId);
+            await LoadMovieData(dto.ItemId);
         }
 
         dialogVisible = true;
     }
 
-    private async void LoadBookData(int itemId)
+    private async Task LoadBookData(int itemId)
     {
         var books = await ApiClient.GetAsync<List<BookDto>>(HttpFactory, "api/books");
         var book = books?.FirstOrDefault(b => b.ItemId == itemId);
@@ -424,7 +450,7 @@
         }
     }
 
-    private async void LoadGameData(int itemId)
+    private async Task LoadGameData(int itemId)
     {
         var games = await ApiClient.GetAsync<List<GameDto>>(HttpFactory, "api/games");
         var game = games?.FirstOrDefault(g => g.ItemId == itemId);
@@ -435,7 +461,7 @@
         }
     }
 
-    private async void LoadMovieData(int itemId)
+    private async Task LoadMovieData(int itemId)
     {
         var movies = await ApiClient.GetAsync<List<MovieDto>>(HttpFactory, "api/movies");
         var movie = movies?.FirstOrDefault(m => m.ItemId == itemId);
@@ -479,7 +505,7 @@
 
             if (!itemResponse.IsSuccessStatusCode)
             {
-                Snackbar.Add("Erreur lors de la création de l'item", Severity.Error);
+                Snackbar.Add("Erreur lors de la crÃ©ation de l'item", Severity.Error);
                 return;
             }
 
@@ -501,7 +527,7 @@
 
             if (!itemResponse.IsSuccessStatusCode)
             {
-                Snackbar.Add("Erreur lors de la mise à jour de l'item", Severity.Error);
+                Snackbar.Add("Erreur lors de la mise Ã  jour de l'item", Severity.Error);
                 return;
             }
         }
@@ -524,7 +550,7 @@
 
         dialogVisible = false;
         await LoadAsync();
-        Snackbar.Add("Item enregistré avec succès", Severity.Success);
+        Snackbar.Add("Item enregistrÃ© avec succÃ¨s", Severity.Success);
     }
 
     private async Task<bool> SaveBookData(int itemId)
@@ -534,7 +560,7 @@
             var response = await ApiClient.PostAsync(HttpFactory, "api/books", new CreateBookDto(itemId, genreId, isbn));
             if (!response.IsSuccessStatusCode)
             {
-                Snackbar.Add("Erreur lors de la création du livre", Severity.Error);
+                Snackbar.Add("Erreur lors de la crÃ©ation du livre", Severity.Error);
                 return false;
             }
         }
@@ -547,7 +573,7 @@
                 var response = await ApiClient.PutAsync(HttpFactory, $"api/books/{book.BookId}", new UpdateBookDto(itemId, genreId, isbn));
                 if (!response.IsSuccessStatusCode)
                 {
-                    Snackbar.Add("Erreur lors de la mise à jour du livre", Severity.Error);
+                    Snackbar.Add("Erreur lors de la mise Ã  jour du livre", Severity.Error);
                     return false;
                 }
             }
@@ -562,7 +588,7 @@
             var response = await ApiClient.PostAsync(HttpFactory, "api/games", new CreateGameDto(itemId, platform, ageRange));
             if (!response.IsSuccessStatusCode)
             {
-                Snackbar.Add("Erreur lors de la création du jeu", Severity.Error);
+                Snackbar.Add("Erreur lors de la crÃ©ation du jeu", Severity.Error);
                 return false;
             }
         }
@@ -575,7 +601,7 @@
                 var response = await ApiClient.PutAsync(HttpFactory, $"api/games/{game.GameId}", new UpdateGameDto(itemId, platform, ageRange));
                 if (!response.IsSuccessStatusCode)
                 {
-                    Snackbar.Add("Erreur lors de la mise à jour du jeu", Severity.Error);
+                    Snackbar.Add("Erreur lors de la mise Ã  jour du jeu", Severity.Error);
                     return false;
                 }
             }
@@ -594,7 +620,7 @@
             var response = await ApiClient.PostAsync(HttpFactory, "api/movies", new CreateMovieDto(itemId, duration, rating));
             if (!response.IsSuccessStatusCode)
             {
-                Snackbar.Add("Erreur lors de la création du film", Severity.Error);
+                Snackbar.Add("Erreur lors de la crÃ©ation du film", Severity.Error);
                 return false;
             }
         }
@@ -607,7 +633,7 @@
                 var response = await ApiClient.PutAsync(HttpFactory, $"api/movies/{movie.MovieId}", new UpdateMovieDto(itemId, duration, rating));
                 if (!response.IsSuccessStatusCode)
                 {
-                    Snackbar.Add("Erreur lors de la mise à jour du film", Severity.Error);
+                    Snackbar.Add("Erreur lors de la mise Ã  jour du film", Severity.Error);
                     return false;
                 }
             }
@@ -620,12 +646,12 @@
         var response = await ApiClient.DeleteAsync(HttpFactory, $"api/items/{dto.ItemId}");
         if (!response.IsSuccessStatusCode)
         {
-            Snackbar.Add("Suppression échouée", Severity.Error);
+            Snackbar.Add("Suppression Ã©chouÃ©e", Severity.Error);
             return;
         }
 
         await LoadAsync();
-        Snackbar.Add("Item supprimé avec succès", Severity.Success);
+        Snackbar.Add("Item supprimÃ© avec succÃ¨s", Severity.Success);
     }
 
     private void SetFilter(ItemFilter filter)
