@@ -1,0 +1,52 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "LybraryManagement.Server",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "dotnet: build",
+      "program": "${workspaceFolder}/LybraryManagement.Server/bin/Debug/net9.0/LybraryManagement.Server",
+      "args": [],
+      "cwd": "${workspaceFolder}/LybraryManagement.Server",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "Now listening on: (http?://\\S+)"
+      },
+      "stopAtEntry": false
+    },
+    {
+      "name": "LybraryManagement.Client (WASM dev server)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${env:DOTNET_ROOT}/dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/LybraryManagement.Server"
+      ],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "Now listening on: (https?://\\S+)"
+      },
+      "stopAtEntry": false
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Run Server + Client",
+      "configurations": [
+        "LybraryManagement.Server",
+        "LybraryManagement.Client (WASM dev server)"
+      ]
+    }
+  ]
+}

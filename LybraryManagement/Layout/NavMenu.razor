@@ -19,13 +19,3 @@
     <MudNavLink Href="/genres" Icon="@Icons.Material.Filled.Style" OnClick="@NavigateAndClose">Genres</MudNavLink>
 </MudNavMenu>
 
-@code {
-    [Parameter] public EventCallback OnNavigation { get; set; }
-
-    private async Task NavigateAndClose()
-    {
-        // Notifie le parent (MainLayout) pour fermer le drawer après navigation
-        if (OnNavigation.HasDelegate)
-            await OnNavigation.InvokeAsync();
-    }
-}
