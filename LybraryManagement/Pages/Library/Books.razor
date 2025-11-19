@@ -8,7 +8,7 @@
 
 <PageTitle>Livres</PageTitle>
 
-<!-- Background avec image de bibliothèque -->
+<!-- Background avec image de bibliothï¿½que -->
 <div class="page-background"></div>
 
 <div class="content-wrapper animate-in">
@@ -33,7 +33,7 @@
         {
             <MudStack AlignItems="AlignItems.Center" Spacing="4" Class="pa-8">
                 <MudIcon Icon="@Icons.Material.Filled.LibraryBooks" Size="Size.Large" Style="color: rgba(255,255,255,0.5); font-size: 5rem;" />
-                <MudText Typo="Typo.h6" Style="color: rgba(255,255,255,0.8);">Aucun livre dans votre bibliothèque</MudText>
+                <MudText Typo="Typo.h6" Style="color: rgba(255,255,255,0.8);">Aucun livre dans votre bibliothÃ¨que</MudText>
                 <MudText Typo="Typo.body2" Style="color: rgba(255,255,255,0.6);">Commencez par ajouter votre premier livre</MudText>
             </MudStack>
         }
@@ -43,9 +43,9 @@
                 <HeaderContent>
                     <MudTh>ID</MudTh>
                     <MudTh>Titre</MudTh>
-                    <MudTh>Créateur</MudTh>
-                    <MudTh>Éditeur</MudTh>
-                    <MudTh>Année</MudTh>
+                    <MudTh>CrÃ©ateur</MudTh>
+                    <MudTh>Editeur</MudTh>
+                    <MudTh>AnnÃ©e</MudTh>
                     <MudTh>Genre</MudTh>
                     <MudTh>ISBN</MudTh>
                     <MudTh Style="text-align: right;">Actions</MudTh>
@@ -53,9 +53,9 @@
                 <RowTemplate>
                     <MudTd DataLabel="ID">@context.BookId</MudTd>
                     <MudTd DataLabel="Titre"><strong>@context.Item?.Title</strong></MudTd>
-                    <MudTd DataLabel="Créateur">@context.Item?.Creator</MudTd>
-                    <MudTd DataLabel="Éditeur">@context.Item?.Publisher</MudTd>
-                    <MudTd DataLabel="Année">@context.Item?.Year</MudTd>
+                    <MudTd DataLabel="Crï¿½ateur">@context.Item?.Creator</MudTd>
+                    <MudTd DataLabel="ï¿½diteur">@context.Item?.Publisher</MudTd>
+                    <MudTd DataLabel="Annï¿½e">@context.Item?.Year</MudTd>
                     <MudTd DataLabel="Genre">@context.GenreId</MudTd>
                     <MudTd DataLabel="ISBN">@context.Isbn</MudTd>
                     <MudTd DataLabel="Actions" Style="text-align: right;">
@@ -78,7 +78,7 @@
 
 @if (dialogVisible)
 {
-    <MudOverlay Visible="true" DarkBackground="true" Absolute="false" />
+    <MudOverlay Visible="true" DarkBackground="true" Absolute="true" />
     <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1400; width: 90%; max-width: 600px;">
         <MudPaper Class="dark-glass-paper pa-6 animate-in">
             <MudStack Spacing="3">
@@ -129,7 +129,7 @@
 }
 
 <style>
-    /* Import du style partagé dans la page */
+    /* Import du style partagï¿½ dans la page */
     @@import url('/css/library-theme.css');
 </style>
 

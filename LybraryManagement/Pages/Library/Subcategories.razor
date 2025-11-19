@@ -79,9 +79,9 @@
 
 @if (dialogVisible)
 {
-    <MudOverlay Visible="true" DarkBackground="true" Absolute="false" />
-    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1400; width: 90%; max-width: 600px;">
-        <MudPaper Class="dark-glass-paper pa-6 animate-in">
+    <MudOverlay Visible="true" DarkBackground="true" Absolute="true" Style="z-index:1300;" />
+    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1400; width: 90%; max-width: 600px; pointer-events: none;">
+        <MudPaper Class="dark-glass-paper pa-6 animate-in" Style="pointer-events: auto;">
             <MudStack Spacing="3">
                 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudText Typo="Typo.h6" Style="color: white;">@dialogTitle</MudText>
