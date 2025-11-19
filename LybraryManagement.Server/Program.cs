@@ -18,6 +18,16 @@ LybraryManagement.Server.StartupExtensions.RegisterApplication(builder.Services,
 
 var app = builder.Build();
 
+// Création automatique de la DB en développement
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<LybraryManagement.Server.Infrastructure.Data.LibraryDbContext>();
+    
+    // Crée la base de données et les tables si elles n'existent pas
+    dbContext.Database.EnsureCreated();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
