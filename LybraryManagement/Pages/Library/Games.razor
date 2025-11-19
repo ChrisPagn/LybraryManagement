@@ -41,21 +41,21 @@
                 <HeaderContent>
                     <MudTh>ID</MudTh>
                     <MudTh>Titre</MudTh>
-                    <MudTh>Créateur</MudTh>
-                    <MudTh>Éditeur</MudTh>
-                    <MudTh>Année</MudTh>
+                    <MudTh>Crï¿½ateur</MudTh>
+                    <MudTh>ï¿½diteur</MudTh>
+                    <MudTh>Annï¿½e</MudTh>
                     <MudTh>Plateforme</MudTh>
-                    <MudTh>Âge</MudTh>
+                    <MudTh>ï¿½ge</MudTh>
                     <MudTh Style="text-align: right;">Actions</MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="ID">@context.GameId</MudTd>
                     <MudTd DataLabel="Titre"><strong>@context.Item?.Title</strong></MudTd>
-                    <MudTd DataLabel="Créateur">@context.Item?.Creator</MudTd>
-                    <MudTd DataLabel="Éditeur">@context.Item?.Publisher</MudTd>
-                    <MudTd DataLabel="Année">@context.Item?.Year</MudTd>
+                    <MudTd DataLabel="Crï¿½ateur">@context.Item?.Creator</MudTd>
+                    <MudTd DataLabel="ï¿½diteur">@context.Item?.Publisher</MudTd>
+                    <MudTd DataLabel="Annï¿½e">@context.Item?.Year</MudTd>
                     <MudTd DataLabel="Plateforme">@context.Platform</MudTd>
-                    <MudTd DataLabel="Âge">@context.AgeRange</MudTd>
+                    <MudTd DataLabel="ï¿½ge">@context.AgeRange</MudTd>
                     <MudTd DataLabel="Actions" Style="text-align: right;">
                         <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                        Color="Color.Info"
@@ -76,7 +76,7 @@
 
 @if (dialogVisible)
 {
-    <MudOverlay Visible="true" DarkBackground="true" Absolute="false" />
+    <MudOverlay Visible="true" DarkBackground="true" Absolute="true" />
     <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1400; width: 90%; max-width: 600px;">
         <MudPaper Class="dark-glass-paper pa-6 animate-in">
             <MudStack Spacing="3">
@@ -103,7 +103,7 @@
                                       Variant="Variant.Outlined" />
 
                         <MudTextField @bind-Value="ageRange"
-                                      Label="Tranche d'âge (ex: 12+, 18+)"
+                                      Label="Tranche d'ï¿½ge (ex: 12+, 18+)"
                                       Variant="Variant.Outlined" />
                     </MudStack>
                 </MudForm>

@@ -41,20 +41,20 @@
                 <HeaderContent>
                     <MudTh>ID</MudTh>
                     <MudTh>Titre</MudTh>
-                    <MudTh>Réalisateur</MudTh>
+                    <MudTh>Rï¿½alisateur</MudTh>
                     <MudTh>Studio</MudTh>
-                    <MudTh>Année</MudTh>
-                    <MudTh>Durée</MudTh>
+                    <MudTh>Annï¿½e</MudTh>
+                    <MudTh>Durï¿½e</MudTh>
                     <MudTh>Classification</MudTh>
                     <MudTh Style="text-align: right;">Actions</MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="ID">@context.MovieId</MudTd>
                     <MudTd DataLabel="Titre"><strong>@context.Item?.Title</strong></MudTd>
-                    <MudTd DataLabel="Réalisateur">@context.Item?.Creator</MudTd>
+                    <MudTd DataLabel="Rï¿½alisateur">@context.Item?.Creator</MudTd>
                     <MudTd DataLabel="Studio">@context.Item?.Publisher</MudTd>
-                    <MudTd DataLabel="Année">@context.Item?.Year</MudTd>
-                    <MudTd DataLabel="Durée">
+                    <MudTd DataLabel="Annï¿½e">@context.Item?.Year</MudTd>
+                    <MudTd DataLabel="Durï¿½e">
                         @if (context.Duration.HasValue)
                         {
                             <span>@FormatDuration(context.Duration.Value)</span>
@@ -81,7 +81,7 @@
 
 @if (dialogVisible)
 {
-    <MudOverlay Visible="true" DarkBackground="true" Absolute="false" />
+    <MudOverlay Visible="true" DarkBackground="true" Absolute="true" />
     <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1400; width: 90%; max-width: 600px;">
         <MudPaper Class="dark-glass-paper pa-6 animate-in">
             <MudStack Spacing="3">
@@ -104,7 +104,7 @@
                                          Variant="Variant.Outlined" />
 
                         <MudTextField @bind-Value="durationText"
-                                      Label="Durée (format: hh:mm:ss)"
+                                      Label="Durï¿½e (format: hh:mm:ss)"
                                       Placeholder="02:15:00"
                                       HelperText="Exemple: 02:15:00 pour 2h15"
                                       Variant="Variant.Outlined" />
