@@ -1,5 +1,3 @@
-//program.cs cote server
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -24,17 +22,27 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseWebAssemblyDebugging(); // Pour déboguer le client WASM
 }
+
+// IMPORTANT : Servir les fichiers statiques du client Blazor
+app.UseBlazorFrameworkFiles();
+app.UseStaticFiles();
+
+app.UseRouting();
 
 // Avant app.Run()
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-app.UseCors("DevCors");
 
+app.UseCors("DevCors");
 app.UseAuthorization();
 
 app.MapControllers();
+
+// CRITIQUE : Rediriger toutes les routes non-API vers index.html
+app.MapFallbackToFile("index.html");
 
 app.Run();
